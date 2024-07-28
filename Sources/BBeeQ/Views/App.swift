@@ -2,8 +2,10 @@ import SwiftUI
 import Charts
 
 struct ThermometerSlider: View {
-  @Binding var current: Int
-  @Binding var target: Int
+  @Binding var current: Double
+  @Binding var target: Double
+
+  @State var mutable = true
 
   @State var minValue = Int(0)
   @State var maxValue = Int(300)
@@ -22,8 +24,10 @@ struct ThermometerSlider: View {
                     .fill(.red.opacity(0.5))
                     .frame(width: geometry.size.width, height: trackHeight)
                     .onTapGesture { location in
-                      withAnimation {
-                        target = Int((location.x / geometry.size.width) * CGFloat(maxValue - minValue)) + minValue
+                      if mutable {
+                        withAnimation {
+                          target = Double((location.x / geometry.size.width) * CGFloat(maxValue - minValue)) + Double(minValue)
+                        }
                       }
                     }
 
@@ -46,8 +50,10 @@ struct ThermometerSlider: View {
                     .gesture(
                         DragGesture(minimumDistance: 0)
                             .onChanged { gesture in
-                                held = true
-                                updateValue(with: gesture, in: geometry)
+                              if mutable {
+                                  held = true
+                                  updateValue(with: gesture, in: geometry)
+                              }
                             }
                             .onEnded { _ in
                               held = false
@@ -64,55 +70,139 @@ struct ThermometerSlider: View {
   private func updateValue(with gesture: DragGesture.Value, in geometry: GeometryProxy) {
         let dragPortion = gesture.location.x / geometry.size.width
         let newValue = Int(dragPortion * CGFloat(maxValue - minValue) + CGFloat(minValue))
-        target = min(max(newValue, minValue), maxValue)
+        target = Double(min(max(newValue, minValue), maxValue))
     }
 }
 
-struct ThermometerView: View {
-  @State private var current = 20
-  @State private var target = 70
+struct Probe: Identifiable {
+  var id: Int
+  var temperature: Double
+  var temperatureTarget: Double
+  var grillTemperature: Double
+  var grillTemperatureTarget: Double
+  // TODO: Store state as enum so that all parts of the UI always handle it
+  // correctly, when e.g. current is not available
+  var mode: ProbeMode = .temperature
+}
+
+enum ProbeMode: String, CaseIterable, Identifiable {
+  // TODO: Don't use the hardware's modes? No need to support timers etc?
+  // Just save the info and let the app deal with it? Always put it in whatever
+  // mode gives us the most data (temp mode - probe and grill?)
+  case temperature, timer
+  var id: Self { self }
+}
+
+struct ProbeView: View {
+  @State var probe: Probe
+
+  @State private var presentSheet = false
+  @Environment(\.dismiss) var dismiss
 
   var body: some View {
-    VStack {
-      ZStack {
-        Circle()
-          .stroke(.red.opacity(0.2), lineWidth: 20)
-          .frame(width: 240, height: 240)
-        Circle()
-          .trim(from: 0.25, to: 1.0)
-          .rotation(.degrees(180))
-          .stroke(.red, lineWidth: 20)
-          .frame(width: 240, height: 240)
-        Circle().fill(.red).frame(width: 36, height: 36).offset(x: -120).shadow(radius: 2)
-        VStack {
-          Text("25°C").font(.largeTitle)
-          Text("180°C")
+    HStack {
+      VStack {
+        HStack{
+          Text("Probe \(probe.id)")
+          Spacer()
+          Label("\(Int(probe.temperature.rounded()))°C/\(Int(probe.temperatureTarget.rounded()))°C", systemImage: "thermometer.medium")
+          Label("\(Int(probe.grillTemperature.rounded()))°C/\(Int(probe.grillTemperatureTarget.rounded()))°C", systemImage: "flame")
         }
-      }.padding()
-
-      Divider()
-
-      ScrollView {
-        VStack {
-          HStack{
-            Text("Probe 1")
-            Spacer()
-            Label("\(current)°C/\(target)°C", systemImage: "thermometer.medium")
-            Label("180°C", systemImage: "flame")
-          }
-          ThermometerSlider(current: $current, target: $target)
-        }.padding()
-        VStack {
-          HStack{
-            Text("Probe 2")
-            Spacer()
-            Label("\(current)°C/\(target)°C", systemImage: "thermometer.medium")
-            Label("180°C", systemImage: "flame")
-          }
-          ThermometerSlider(current: $current, target: $target)
-        }.padding()
+        HStack {
+          Image(systemName: "thermometer.medium")
+          ThermometerSlider(current: $probe.temperature, target: $probe.temperatureTarget, minValue: 0, maxValue: 100)
+        }
+        HStack {
+          Image(systemName: "flame")
+          ThermometerSlider(current: $probe.grillTemperature, target: $probe.grillTemperatureTarget, minValue: 0, maxValue: 300)
+        }
       }
-    }
+      Button {
+        presentSheet.toggle()
+      } label: {
+        Image(systemName: "info.circle").resizable().foregroundStyle(.secondary)
+          .frame(width: 16, height: 16)
+      }
+      .buttonStyle(PlainButtonStyle())
+      .sheet(isPresented: $presentSheet) {
+          // Do noting
+        } content: {
+        VStack {
+          Form {
+            Section("Settings") {
+              Picker("Mode", selection: $probe.mode) {
+                Text("Temperature").tag(ProbeMode.temperature)
+                Text("Timer").tag(ProbeMode.timer)
+              }
+
+              switch probe.mode {
+                case .temperature:
+                  Slider(value: $probe.temperatureTarget, in: 0...100, minimumValueLabel: Text("0°C"),
+                maximumValueLabel: Text("100°C"))
+                  {
+                    Text("Target temperature")
+                  }
+                  Slider(value: $probe.grillTemperatureTarget, in: 0...300, minimumValueLabel: Text("0°C"),
+                maximumValueLabel: Text("300°C"))
+                  {
+                    Text("Target grill temperature")
+                  }
+                case .timer:
+                  Text("TODO")
+              }
+            }
+            Section("Advanced") {
+              // TODO: Connect or disconnect, depending on state
+              Button("Connect", role: .destructive) {
+
+              }
+              // TODO: Remove from model data. Nice to keep for history etc.?
+              // Feature creep: Store "sessions" i.e. a continous use, see data,
+              // name courses
+              Button("Forget", role: .destructive) {
+
+              }
+            }
+          }.padding(5).formStyle(.grouped)
+
+          // Footer
+          HStack {
+            Spacer()
+            Button("Cancel") {
+              // TODO: Revert changes
+              // TODO: Don't modify in-place, keep "newX" variables
+              dismiss()
+              presentSheet = false
+            }
+            Button("Done") {
+              // TODO: Apply changes
+              // TODO: Doesn't work
+              dismiss()
+              presentSheet = false
+            }
+            .keyboardShortcut(.defaultAction)
+          } .padding(20)
+        }
+      }
+    }.padding()
+      .background(.white)
+      .cornerRadius(15)
+  }
+}
+
+struct ThermometerView: View {
+  private var probes: [Probe] = [Probe(id: 1, temperature: 20, temperatureTarget: 71, grillTemperature: 100, grillTemperatureTarget: 200), Probe(id: 2, temperature: 20, temperatureTarget: 71, grillTemperature: 100, grillTemperatureTarget: 20)]
+
+  var body: some View {
+     List {
+      // TODO: Draggable to move within list
+      ForEach(probes) { probe in
+        ProbeView(probe: probe)
+      }
+
+      // TODO: Empty placeholder
+    }.scrollContentBackground(.hidden)
+      .background(.clear)
   }
 }
 
@@ -287,8 +377,24 @@ struct ChartsView: View {
 }
 
 struct SettingsView: View {
+  @State private var autoConnect = true
+
   var body: some View {
-    Text("Settings")
+    VStack {
+          Form {
+            Section("General") {
+              Toggle("Auto connect", isOn: $autoConnect)
+            }
+            Section("Advanced") {
+              Button("Disconnect all probes")  {
+
+              }
+              Button("Forgett all probes") {
+
+              }
+            }
+          }.padding(5).formStyle(.grouped)
+    }
   }
 }
 
