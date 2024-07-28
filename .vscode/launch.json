@@ -1,0 +1,24 @@
+{
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "sourceLanguages": ["swift"],
+      "args": [],
+      "cwd": "${workspaceFolder:BBeeQ}",
+      "name": "Debug BBeeQ",
+      "program": "${workspaceFolder:BBeeQ}/.build/debug/BBeeQ",
+      "preLaunchTask": "swift: Build Debug BBeeQ"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "sourceLanguages": ["swift"],
+      "args": [],
+      "cwd": "${workspaceFolder:BBeeQ}",
+      "name": "Release BBeeQ",
+      "program": "${workspaceFolder:BBeeQ}/.build/release/BBeeQ",
+      "preLaunchTask": "swift: Build Release BBeeQ"
+    }
+  ]
+}
