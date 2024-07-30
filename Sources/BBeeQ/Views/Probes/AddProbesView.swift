@@ -13,22 +13,24 @@ struct AddProbesView: View {
   @Environment(\.probePeripheralManager) var probePeripheralManager:
     ProbePeripheralManager?
 
+  @Query private var probes: [Probe]
+
   var body: some View {
     VStack {
       Form {
-        Section("Discovered probes") {
+        Section {
+          let newProbes = Array(probePeripheralManager!.discovered.values).filter { peripheral in !probes.contains(where: { probe in peripheral.identifier.uuidString == probe.id })}
           List(
-            // TODO: Show only new probes, not existing ones
-            Array(probePeripheralManager!.discovered.values), id: \.identifier,
+            newProbes, id: \.identifier,
             selection: $selection
           ) { peripheral in
             Text(peripheral.identifier.uuidString)
           }
-          // if let discovered = probePeripheralManager?.discovered.values.sorted {$0.identifier.uuidString < $1.identifier.uuidString} {
-          //   List(Array(discovered), id: \.identifier, selection: $discoveredSelection) { identifier in
-          //     Text(identifier.uuidString)
-          //   }
-          // }
+        } header: {
+          HStack {
+            Text("Discovering probes")
+            ProgressView().scaleEffect(0.5)
+          }
         }
       }
       .padding(5).formStyle(.grouped)
@@ -61,7 +63,9 @@ struct AddProbesView: View {
                       .connect(peripheral: peripheral)
 
                     let context = ModelContext(modelContext.container)
-                    context.insert(Probe(id: probe.id.uuidString, name: probe.deviceName ?? "", temperatureTarget: 65, grillTemperatureTarget: 300))
+                    // TODO: Name is always empty as we haven't gotten the
+                    // device name characteristic yet
+                    context.insert(Probe(id: probe.id.uuidString, name: probe.deviceName ?? "Probe \(probes.count + 1)", temperatureTarget: 65, grillTemperatureTarget: 300))
                     try context.save()
 
                     // TODO: Swift breaks if we don't state of: ProbePeripheral

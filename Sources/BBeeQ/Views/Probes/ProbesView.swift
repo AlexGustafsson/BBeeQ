@@ -10,11 +10,13 @@ struct ProbeView: View {
   @State private var presentSheet = false
   @Environment(\.dismiss) var dismiss
 
+  @Query private var probes: [Probe]
+
   var body: some View {
     HStack {
       VStack {
         HStack {
-          Text(probe.name.count > 0 ? probe.name : "Unnamed probe")
+          Text(probe.name)
           Spacer()
           if peripheral?.state != .connected {
             Image(systemName: "wifi.slash").foregroundStyle(.orange)
@@ -189,15 +191,15 @@ struct ProbesView: View {
       }
       .buttonStyle(PlainButtonStyle())
       .overlay {
-        // TODO: Only show new probes, not existing ones
-        CountBadge(value: probePeripheralManager?.discovered.count ?? 0)
+        let newProbes = Array(probePeripheralManager!.discovered.values).filter { peripheral in !probes.contains(where: { probe in peripheral.identifier.uuidString == probe.id })}
+        CountBadge(value: newProbes.count)
           .offset(x: 20, y: -20)
       }
       .padding()
       .sheet(isPresented: $presentAddProbeSheet) {
         // Do nothing
       } content: {
-        AddProbesView()
+        AddProbesView().frame(width: 520)
       }
     }
   }
