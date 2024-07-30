@@ -19,17 +19,13 @@ enum Message {
   case discovered(CBPeripheral)
 }
 
-// TODO: Manager keeps a list of peripherals published - makes more sense for a
-// UI? Or a separate thing perhaps that kan have it - low-level delegates and then
-// high level list...
-
-protocol ProbePeripheralDelegate {
-  func peripheralManager(didDiscover: CBPeripheral)
-  func peripheralManager(didConnect: CBPeripheral)
+public protocol ProbePeripheralDelegate {
+  func probePeripheralManager(didDiscover: CBPeripheral)
 }
 
-@Observable public class ProbePeripheralManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
+public class ProbePeripheralManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
   private var centralManager: CBCentralManager!
+  private var delegate: ProbePeripheralDelegate
 
   public var discovered: [UUID: CBPeripheral] = [:]
   public var connectionAttempts: [UUID: CheckedContinuation<(), any Error>] = [:]
@@ -43,7 +39,8 @@ protocol ProbePeripheralDelegate {
     case connectionFailed((any Error)?)
   }
 
-  public init(queue: dispatch_queue_t?) {
+  public init(delegate: ProbePeripheralDelegate, queue: dispatch_queue_t?) {
+    self.delegate = delegate
     super.init()
     self.centralManager = CBCentralManager(delegate: self, queue: queue)
   }
@@ -90,6 +87,7 @@ protocol ProbePeripheralDelegate {
     if self.discovered[peripheral.identifier] == nil {
       print("discovered")
       self.discovered[peripheral.identifier] = peripheral
+      self.delegate.probePeripheralManager(didDiscover: peripheral)
     }
   }
 
@@ -112,17 +110,20 @@ protocol ProbePeripheralDelegate {
 
   public func centralManager(_ manager: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: (any Error)?) {
     print("disconnected", error)
-    self.connections.removeValue(forKey: peripheral.identifier)
     // Received when docking:
     // disconnected Optional(Error Domain=CBErrorDomain Code=6 "The connection has timed out unexpectedly." UserInfo={NSLocalizedDescription=The connection has timed out unexpectedly.})
     // TODO - use and figure out if we need this and the one below, or just one
     // of them
+    if let connection = self.connections.removeValue(forKey: peripheral.identifier) {
+      connection.peripheral(didDisconnect: peripheral, error: error)
+    }
   }
 
   public func centralManager(_ manager: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, timestamp: CFAbsoluteTime, isReconnecting: Bool, error: (any Error)?) {
     print("disconnected - reconnect", error)
     // TODO - use and figure out if we need this and the one above, or just one
     // of them
+    // TODO: Delete from connections?
   }
 
   public func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: (any Error)?) {

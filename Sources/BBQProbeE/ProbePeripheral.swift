@@ -3,19 +3,23 @@ import Observation
 import CoreBluetooth
 
 @Observable public class ProbePeripheral: NSObject, Identifiable, CBPeripheralDelegate {
-  private let peripheral: CBPeripheral
-
   public var manufacturerName: String?
   public var modelNumber: String?
   public var serialNumber: String?
   public var firmwareRevision: String?
 
   public var deviceName: String?
-  public var grillTemperature: Float?
-  public var probeTemperature: Float?
+  public var grillTemperature: Double?
+  public var probeTemperature: Double?
+
+  // Basically reflect peripheral.state, but keep it observable
+  public var state: CBPeripheralState
+
+  private let peripheral: CBPeripheral
 
   internal init(peripheral: CBPeripheral)  {
     self.peripheral = peripheral
+    self.state = peripheral.state
     super.init()
     // NOTE: Changing delegate of the peripheral doesn't seem to work, simply
     // relay all calls
@@ -91,10 +95,15 @@ import CoreBluetooth
         break
     }
   }
+
+  public func peripheral(didDisconnect peripheral: CBPeripheral, error: (any Error)?) {
+    print("periph disconnect")
+    self.state = peripheral.state
+  }
 }
 
-func convertReadingToDegrees(value: UInt16) -> Float {
+func convertReadingToDegrees(value: UInt16) -> Double {
   // TODO: The official app caps the readings at [0, 300]. Perhaps experiment
   // what range the thermometer actually has
-  return max(min(Float(value) / 10 - 40, 300), 0)
+  return max(min(Double(value) / 10 - 40, 300), 0)
 }

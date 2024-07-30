@@ -1,19 +1,17 @@
 import SwiftData
 
 @Model final class Probe: Identifiable {
-  var id: String
+  @Attribute(.unique) var id: String
 
-  @Transient var temperature: Double = 0
+  var name: String
+
   var temperatureTarget: Double
-
-  @Transient var grillTemperature: Double = 0
   var grillTemperatureTarget: Double
 
-  init(id: String, temperatureTarget: Double, grillTemperatureTarget: Double) {
+  init(id: String, name: String, temperatureTarget: Double, grillTemperatureTarget: Double) {
     self.id = id
-
+    self.name = name
     self.temperatureTarget = temperatureTarget
-
     self.grillTemperatureTarget = grillTemperatureTarget
   }
 }

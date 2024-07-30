@@ -1,8 +1,10 @@
 import SwiftUI
 import SwiftData
+import BBQProbeE
 
 struct ProbeView: View {
   @State var probe: Probe
+  @State var peripheral: ProbePeripheral?
 
   @State private var presentSheet = false
   @Environment(\.dismiss) var dismiss
@@ -11,18 +13,29 @@ struct ProbeView: View {
     HStack {
       VStack {
         HStack{
-          Text("Probe \(probe.id)")
+          Text(probe.name.count > 0 ? probe.name :  "Unnamed probe")
           Spacer()
-          Label("\(Int(probe.temperature.rounded()))°C/\(Int(probe.temperatureTarget.rounded()))°C", systemImage: "thermometer.medium")
-          Label("\(Int(probe.grillTemperature.rounded()))°C/\(Int(probe.grillTemperatureTarget.rounded()))°C", systemImage: "flame")
+          if peripheral?.state != .connected {
+            Image(systemName: "wifi.slash").foregroundStyle(.orange)
+          }
+          Label {
+            Text("\(Int(peripheral?.probeTemperature?.rounded() ?? 0))°C/\(Int(probe.temperatureTarget.rounded()))°C")
+          } icon: {
+            Image(systemName: "thermometer.medium").foregroundStyle(.red)
+            }
+          Label {
+            Text("\(Int(peripheral?.grillTemperature?.rounded() ?? 0))°C/\(Int(probe.grillTemperatureTarget.rounded()))°C")
+          } icon: {
+            Image(systemName: "flame").foregroundStyle(.red)
+          }
         }
         HStack {
-          Image(systemName: "thermometer.medium")
-          ThermometerSlider(current: $probe.temperature, target: $probe.temperatureTarget, minValue: 0, maxValue: 100)
+          Image(systemName: "thermometer.medium").foregroundStyle(.red)
+          ThermometerSlider(current: peripheral?.probeTemperature ?? 0, target: $probe.temperatureTarget, minValue: 0, maxValue: 100)
         }
         HStack {
-          Image(systemName: "flame")
-          ThermometerSlider(current: $probe.grillTemperature, target: $probe.grillTemperatureTarget, minValue: 0, maxValue: 300)
+          Image(systemName: "flame").foregroundStyle(.red)
+          ThermometerSlider(current: peripheral?.grillTemperature ?? 0, target: $probe.grillTemperatureTarget, minValue: 0, maxValue: 300)
         }
       }
       Button {
@@ -48,8 +61,20 @@ struct ProbeView: View {
                 {
                   Text("Target grill temperature")
                 }
+                TextField("Name", text: $probe.name)
+            }
+            Section("Data") {
+              LabeledContent("Probe temperature") {Text(peripheral?.probeTemperature?.formatted(.number) ?? "")}
+              LabeledContent("Grill temperature") {Text(peripheral?.grillTemperature?.formatted(.number) ?? "")}
             }
             Section("Advanced") {
+              LabeledContent("Device name") {Text(peripheral?.deviceName ?? "")}
+              LabeledContent("ID") {Text(peripheral?.id.uuidString ?? "")}
+              LabeledContent("Manufacturer") {Text(peripheral?.manufacturerName ?? "")}
+              LabeledContent("Model number") {Text(peripheral?.modelNumber ?? "")}
+              LabeledContent("Serial number") {Text(peripheral?.serialNumber ?? "")}
+              LabeledContent("Firmware revision") {Text(peripheral?.firmwareRevision ?? "")}
+              // TODO: Name text field
               // TODO: Connect or disconnect, depending on state
               Button("Connect", role: .destructive) {
 
@@ -90,12 +115,13 @@ struct ProbeView: View {
 
 struct ProbesView: View {
   @Query(sort: \Probe.id) var probes: [Probe]
+  @Environment(\.probePeripheralManager) var probePeripheralManager: ProbePeripheralManager?
 
   var body: some View {
      List {
       // TODO: Draggable to move within list
       ForEach(probes) { probe in
-        ProbeView(probe: probe)
+        ProbeView(probe: probe, peripheral: probePeripheralManager?.connections[UUID(uuidString: probe.id)!])
       }
 
       if probes.count == 0 {

@@ -1,12 +1,13 @@
 import SwiftUI
 
 struct ThermometerSlider: View {
-  @Binding var current: Double
+  var current: Double
   @Binding var target: Double
 
   @State var minValue = Int(0)
   @State var maxValue = Int(300)
 
+  @State private var representedCurrent: Double = 0
   @State private var held = false
 
   private let trackHeight: CGFloat = 8
@@ -27,11 +28,16 @@ struct ThermometerSlider: View {
                     }
 
                 //--Tinted track
-                let currentWidth = geometry.size.width * CGFloat(current)/CGFloat(maxValue - minValue)
+                let currentWidth = geometry.size.width * CGFloat(representedCurrent)/CGFloat(maxValue - minValue)
                 RoundedRectangle(cornerRadius: 4)
                     .fill(.red)
                     .frame(width: currentWidth, height: trackHeight)
                     .allowsHitTesting(false)
+                    .onChange(of: current) {
+                      withAnimation {
+                        representedCurrent = current
+                      }
+                    }
 
                 //--Thumb
                 Circle()
