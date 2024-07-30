@@ -1,5 +1,5 @@
-import os
 import CoreBluetooth
+import os
 
 internal let BBQProbeEServiceUUID = "FB00"
 internal let BBQProbeEDeviceNameCharacteristicUUID = "FB01"
@@ -14,7 +14,6 @@ internal let DeviceInformationModelNumberCharacteristicUUID = "2A24"
 internal let DeviceInformationSerialNumberCharacteristicUUID = "2A25"
 internal let DeviceInformationFirmwareRevisionCharacteristicUUID = "2A26"
 
-
 enum Message {
   case discovered(CBPeripheral)
 }
@@ -23,13 +22,17 @@ public protocol ProbePeripheralDelegate {
   func probePeripheralManager(didDiscover: CBPeripheral)
 }
 
-@Observable public class ProbePeripheralManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
+@Observable
+public class ProbePeripheralManager: NSObject, CBCentralManagerDelegate,
+  CBPeripheralDelegate
+{
   private var centralManager: CBCentralManager!
   private var delegate: ProbePeripheralDelegate
 
   public var discovered: [UUID: CBPeripheral] = [:]
-  public var connectionAttempts: [UUID: CheckedContinuation<(), any Error>] = [:]
-  public var connections:  [UUID: ProbePeripheral] = [:]
+  public var connectionAttempts: [UUID: CheckedContinuation<(), any Error>] =
+    [:]
+  public var connections: [UUID: ProbePeripheral] = [:]
 
   // TODO: Equatable, but can't be done due to connectionFailed error
   enum ConnectionError: Error {
@@ -45,7 +48,8 @@ public protocol ProbePeripheralDelegate {
     self.centralManager = CBCentralManager(delegate: self, queue: queue)
   }
 
-  public func connect(peripheral: CBPeripheral) async throws -> ProbePeripheral {
+  public func connect(peripheral: CBPeripheral) async throws -> ProbePeripheral
+  {
     print("connecting")
     if self.connectionAttempts[peripheral.identifier] != nil {
       throw ConnectionError.connectionInProgress
@@ -60,7 +64,9 @@ public protocol ProbePeripheralDelegate {
       self.connectionAttempts[peripheral.identifier] = continuation
       peripheral.delegate = self
       // TODO: reconnect doesn't seem to be working?
-      self.centralManager.connect(peripheral, options: [CBConnectPeripheralOptionEnableAutoReconnect: true])
+      self.centralManager.connect(
+        peripheral,
+        options: [CBConnectPeripheralOptionEnableAutoReconnect: true])
     }
 
     let p = ProbePeripheral(peripheral: peripheral)
@@ -79,11 +85,16 @@ public protocol ProbePeripheralDelegate {
     print(manager.state)
     if manager.state == .poweredOn {
       print("scanning")
-      self.centralManager.scanForPeripherals(withServices: [CBUUID(string: BBQProbeEServiceUUID)])
+      self.centralManager.scanForPeripherals(withServices: [
+        CBUUID(string: BBQProbeEServiceUUID)
+      ])
     }
   }
 
-  public func centralManager(_ manager: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi: NSNumber) {
+  public func centralManager(
+    _ manager: CBCentralManager, didDiscover peripheral: CBPeripheral,
+    advertisementData: [String: Any], rssi: NSNumber
+  ) {
     if self.discovered[peripheral.identifier] == nil {
       print("discovered")
       self.discovered[peripheral.identifier] = peripheral
@@ -91,44 +102,65 @@ public protocol ProbePeripheralDelegate {
     }
   }
 
-  public func centralManager(_ manager: CBCentralManager, didConnect peripheral: CBPeripheral) {
+  public func centralManager(
+    _ manager: CBCentralManager, didConnect peripheral: CBPeripheral
+  ) {
     // Discover services for the peripheral, kick starting the connection
     // validation flow
     print("connected, discovering services")
-    peripheral.discoverServices([CBUUID(string: BBQProbeEServiceUUID), CBUUID(string: DeviceInformationServiceUUID)])
+    peripheral.discoverServices([
+      CBUUID(string: BBQProbeEServiceUUID),
+      CBUUID(string: DeviceInformationServiceUUID),
+    ])
   }
 
-  public func centralManager(_ manager: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: (any Error)?) {
+  public func centralManager(
+    _ manager: CBCentralManager, didFailToConnect peripheral: CBPeripheral,
+    error: (any Error)?
+  ) {
     print("failed to connect", error)
 
-    guard let connectionAttempt = self.connectionAttempts[peripheral.identifier] else {
+    guard let connectionAttempt = self.connectionAttempts[peripheral.identifier]
+    else {
       return
     }
     connectionAttempt.resume(throwing: ConnectionError.connectionFailed(error))
     self.connectionAttempts[peripheral.identifier] = nil
   }
 
-  public func centralManager(_ manager: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: (any Error)?) {
+  public func centralManager(
+    _ manager: CBCentralManager,
+    didDisconnectPeripheral peripheral: CBPeripheral, error: (any Error)?
+  ) {
     print("disconnected", error)
     // Received when docking:
     // disconnected Optional(Error Domain=CBErrorDomain Code=6 "The connection has timed out unexpectedly." UserInfo={NSLocalizedDescription=The connection has timed out unexpectedly.})
     // TODO - use and figure out if we need this and the one below, or just one
     // of them
-    if let connection = self.connections.removeValue(forKey: peripheral.identifier) {
+    if let connection = self.connections.removeValue(
+      forKey: peripheral.identifier)
+    {
       connection.peripheral(didDisconnect: peripheral, error: error)
     }
   }
 
-  public func centralManager(_ manager: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, timestamp: CFAbsoluteTime, isReconnecting: Bool, error: (any Error)?) {
+  public func centralManager(
+    _ manager: CBCentralManager,
+    didDisconnectPeripheral peripheral: CBPeripheral, timestamp: CFAbsoluteTime,
+    isReconnecting: Bool, error: (any Error)?
+  ) {
     print("disconnected - reconnect", error)
     // TODO - use and figure out if we need this and the one above, or just one
     // of them
     // TODO: Delete from connections?
   }
 
-  public func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: (any Error)?) {
+  public func peripheral(
+    _ peripheral: CBPeripheral, didDiscoverServices error: (any Error)?
+  ) {
     print("discovered services")
-    guard let connectionAttempt = self.connectionAttempts[peripheral.identifier] else {
+    guard let connectionAttempt = self.connectionAttempts[peripheral.identifier]
+    else {
       return
     }
 
@@ -140,37 +172,51 @@ public protocol ProbePeripheralDelegate {
     }
 
     // Validate that the services exist
-    guard let probeService = peripheral.services?.first(where: {$0.uuid.uuidString == BBQProbeEServiceUUID}) else {
-      connectionAttempt.resume(throwing: ConnectionError.missingRequiredServices)
+    guard
+      let probeService = peripheral.services?
+        .first(where: { $0.uuid.uuidString == BBQProbeEServiceUUID })
+    else {
+      connectionAttempt.resume(
+        throwing: ConnectionError.missingRequiredServices)
       self.connectionAttempts[peripheral.identifier] = nil
       return
     }
 
-    guard let deviceInformationService = peripheral.services?.first(where: {$0.uuid.uuidString == DeviceInformationServiceUUID}) else {
-      connectionAttempt.resume(throwing: ConnectionError.missingRequiredServices)
+    guard
+      let deviceInformationService = peripheral.services?
+        .first(where: { $0.uuid.uuidString == DeviceInformationServiceUUID })
+    else {
+      connectionAttempt.resume(
+        throwing: ConnectionError.missingRequiredServices)
       self.connectionAttempts[peripheral.identifier] = nil
       return
     }
 
     // Discover required characteristics
-    peripheral.discoverCharacteristics([
-      CBUUID(string: BBQProbeEDeviceNameCharacteristicUUID),
-      CBUUID(string: BBQProbeETemperatureEventsCharacteristicUUID),
-      CBUUID(string: BBQProbeEResponseCharacteristicUUID),
-      CBUUID(string: BBQProbeEStatusEventsCharacteristicUUID),
-    ], for: probeService)
+    peripheral.discoverCharacteristics(
+      [
+        CBUUID(string: BBQProbeEDeviceNameCharacteristicUUID),
+        CBUUID(string: BBQProbeETemperatureEventsCharacteristicUUID),
+        CBUUID(string: BBQProbeEResponseCharacteristicUUID),
+        CBUUID(string: BBQProbeEStatusEventsCharacteristicUUID),
+      ], for: probeService)
 
-    peripheral.discoverCharacteristics([
-      CBUUID(string: DeviceInformationManufacturerNameCharacteristicUUID),
-      CBUUID(string: DeviceInformationModelNumberCharacteristicUUID),
-      CBUUID(string: DeviceInformationSerialNumberCharacteristicUUID),
-      CBUUID(string: DeviceInformationFirmwareRevisionCharacteristicUUID),
-    ], for: deviceInformationService)
+    peripheral.discoverCharacteristics(
+      [
+        CBUUID(string: DeviceInformationManufacturerNameCharacteristicUUID),
+        CBUUID(string: DeviceInformationModelNumberCharacteristicUUID),
+        CBUUID(string: DeviceInformationSerialNumberCharacteristicUUID),
+        CBUUID(string: DeviceInformationFirmwareRevisionCharacteristicUUID),
+      ], for: deviceInformationService)
   }
 
-  public func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: (any Error)?) {
+  public func peripheral(
+    _ peripheral: CBPeripheral,
+    didDiscoverCharacteristicsFor service: CBService, error: (any Error)?
+  ) {
     print("discovered characteristics")
-    guard let connectionAttempt = self.connectionAttempts[peripheral.identifier] else {
+    guard let connectionAttempt = self.connectionAttempts[peripheral.identifier]
+    else {
       return
     }
 
@@ -190,23 +236,32 @@ public protocol ProbePeripheralDelegate {
     self.connectionAttempts[peripheral.identifier] = nil
   }
 
-  public func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: (any Error)?) {
-     // NOTE: Changing delegate of the peripheral doesn't seem to work, simply
-     // relay all calls
-     guard let connection = self.connections[peripheral.identifier] else {
-      return
-     }
-
-    connection.peripheral(peripheral, didUpdateNotificationStateFor: characteristic, error: error)
-  }
-
-  public func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: (any Error)?) {
+  public func peripheral(
+    _ peripheral: CBPeripheral,
+    didUpdateNotificationStateFor characteristic: CBCharacteristic,
+    error: (any Error)?
+  ) {
     // NOTE: Changing delegate of the peripheral doesn't seem to work, simply
     // relay all calls
     guard let connection = self.connections[peripheral.identifier] else {
       return
-     }
+    }
 
-    connection.peripheral(peripheral, didUpdateValueFor: characteristic, error: error)
+    connection.peripheral(
+      peripheral, didUpdateNotificationStateFor: characteristic, error: error)
+  }
+
+  public func peripheral(
+    _ peripheral: CBPeripheral,
+    didUpdateValueFor characteristic: CBCharacteristic, error: (any Error)?
+  ) {
+    // NOTE: Changing delegate of the peripheral doesn't seem to work, simply
+    // relay all calls
+    guard let connection = self.connections[peripheral.identifier] else {
+      return
+    }
+
+    connection.peripheral(
+      peripheral, didUpdateValueFor: characteristic, error: error)
   }
 }

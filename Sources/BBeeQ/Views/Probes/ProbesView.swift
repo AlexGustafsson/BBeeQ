@@ -50,7 +50,12 @@ struct ProbesView: View {
       }
       .buttonStyle(PlainButtonStyle())
       .overlay {
-        let newProbes = Array(probePeripheralManager!.discovered.values).filter { peripheral in !probes.contains(where: { probe in peripheral.identifier.uuidString == probe.id })}
+        let newProbes = Array(probePeripheralManager!.discovered.values)
+          .filter { peripheral in
+            !probes.contains(where: { probe in
+              peripheral.identifier.uuidString == probe.id
+            })
+          }
         CountBadge(value: newProbes.count)
           .offset(x: 20, y: -20)
       }

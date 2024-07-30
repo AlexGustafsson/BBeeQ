@@ -9,7 +9,8 @@ struct CountBadge: View {
     ZStack {
       Capsule().fill(.white)
         .frame(
-          width: size * widthMultplier(), height: size, alignment: .topTrailing)
+          width: size * widthMultplier(), height: size, alignment: .topTrailing
+        )
         .shadow(radius: 2)
 
       if value < 100 {

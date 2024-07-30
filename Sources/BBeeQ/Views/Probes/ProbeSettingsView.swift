@@ -1,5 +1,5 @@
-import SwiftUI
 import BBQProbeE
+import SwiftUI
 
 struct ProbeSettingsView: View {
   @State var probe: Probe

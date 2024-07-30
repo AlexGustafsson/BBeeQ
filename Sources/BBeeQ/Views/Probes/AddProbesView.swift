@@ -1,7 +1,7 @@
 import BBQProbeE
 import CoreBluetooth
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 struct AddProbesView: View {
   @State private var selection: Set<UUID> = Set()
@@ -19,7 +19,12 @@ struct AddProbesView: View {
     VStack {
       Form {
         Section {
-          let newProbes = Array(probePeripheralManager!.discovered.values).filter { peripheral in !probes.contains(where: { probe in peripheral.identifier.uuidString == probe.id })}
+          let newProbes = Array(probePeripheralManager!.discovered.values)
+            .filter { peripheral in
+              !probes.contains(where: { probe in
+                peripheral.identifier.uuidString == probe.id
+              })
+            }
           List(
             newProbes, id: \.identifier,
             selection: $selection
@@ -40,17 +45,18 @@ struct AddProbesView: View {
         Spacer()
         Button("Cancel") {
           dismiss()
-        }.disabled(adding)
+        }
+        .disabled(adding)
         Button(selection.count == 0 ? "Add" : "Add \(selection.count)") {
           self.adding = true
           Task {
-            defer {self.adding = false}
+            defer { self.adding = false }
             guard let manager = self.probePeripheralManager else {
               return
             }
 
             do {
-             try await withThrowingTaskGroup(of: ProbePeripheral.self) {
+              try await withThrowingTaskGroup(of: ProbePeripheral.self) {
                 taskGroup in
                 for id in selection {
                   guard let peripheral = manager.discovered[id] else {
@@ -64,7 +70,11 @@ struct AddProbesView: View {
                     let context = ModelContext(modelContext.container)
                     // TODO: Name is always empty as we haven't gotten the
                     // device name characteristic yet
-                    context.insert(Probe(id: probe.id.uuidString, name: probe.deviceName ?? "Probe \(probes.count + 1)", temperatureTarget: 65, grillTemperatureTarget: 300))
+                    context.insert(
+                      Probe(
+                        id: probe.id.uuidString,
+                        name: probe.deviceName ?? "Probe \(probes.count + 1)",
+                        temperatureTarget: 65, grillTemperatureTarget: 300))
                     try context.save()
 
                     // TODO: Swift breaks if we don't state of: ProbePeripheral

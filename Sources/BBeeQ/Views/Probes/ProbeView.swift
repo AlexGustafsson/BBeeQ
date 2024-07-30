@@ -60,8 +60,9 @@ struct ProbeView: View {
       } content: {
         ProbeSettingsView(probe: probe, peripheral: peripheral)
       }
-    }.padding()
-      .background(.white)
-      .cornerRadius(15)
+    }
+    .padding()
+    .background(.white)
+    .cornerRadius(15)
   }
 }
