@@ -3,11 +3,14 @@ import os
 import BBQProbeE
 import Combine
 import SwiftUI
+import SwiftData
 
 private let logger = Logger(
   subsystem: Bundle.main.bundleIdentifier!, category: "Main")
 
 class AppDelegate: NSObject, NSApplicationDelegate {
+  public let modelContainer: ModelContainer = try! ModelContainer.initDefault()
+
   func applicationDidFinishLaunching(_ aNotification: Notification) {
     logger.info("Started RSSBar")
     DispatchQueue.main.async {
@@ -21,7 +24,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
   var body: some Scene {
     WindowGroup {
-      AppView()
+      AppView().modelContainer(appDelegate.modelContainer)
     }
   }
 }
