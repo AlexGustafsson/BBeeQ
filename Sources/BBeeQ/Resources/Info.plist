@@ -8,6 +8,8 @@
 		<string>BBeeQ</string>
 		<key>CFBundleName</key>
 		<string>BBeeQ</string>
+		<key>CFBundleExecutable</key>
+		<string>BBeeQ</string>
 		<key>CFBundlePackageType</key>
 		<string>BNDL</string>
 		<key>NSHumanReadableCopyright</key>
