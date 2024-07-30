@@ -28,7 +28,7 @@ struct AddProbesView: View {
           }
         } header: {
           HStack {
-            Text("Discovering probes")
+            Text(adding ? "Connecting probes" : "Discovering probes")
             ProgressView().scaleEffect(0.5)
           }
         }
@@ -39,13 +39,12 @@ struct AddProbesView: View {
       HStack {
         Spacer()
         Button("Cancel") {
-          // TODO: Revert changes
-          // TODO: Don't modify in-place, keep "newX" variables
           dismiss()
-        }
+        }.disabled(adding)
         Button(selection.count == 0 ? "Add" : "Add \(selection.count)") {
           self.adding = true
           Task {
+            defer {self.adding = false}
             guard let manager = self.probePeripheralManager else {
               return
             }
@@ -83,7 +82,7 @@ struct AddProbesView: View {
             dismiss()
           }
         }
-        .disabled(selection.count == 0)
+        .disabled(selection.count == 0 || adding)
         .keyboardShortcut(.defaultAction)
       }
       .padding(20)
