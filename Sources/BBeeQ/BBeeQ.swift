@@ -1,21 +1,22 @@
-import CoreBluetooth
-import os
 import BBQProbeE
 import Combine
-import SwiftUI
+import CoreBluetooth
 import SwiftData
+import SwiftUI
+import os
 
 private let logger = Logger(
   subsystem: Bundle.main.bundleIdentifier!, category: "Main")
 
 class AppDelegate: NSObject, NSApplicationDelegate, ProbePeripheralDelegate {
   public let modelContainer: ModelContainer
-  public var probePeripheralManager: ProbePeripheralManager!;
+  public var probePeripheralManager: ProbePeripheralManager!
 
   override init() {
     self.modelContainer = try! ModelContainer.initDefault()
     super.init()
-    self.probePeripheralManager = ProbePeripheralManager(delegate: self, queue: DispatchQueue.main)
+    self.probePeripheralManager = ProbePeripheralManager(
+      delegate: self, queue: DispatchQueue.main)
   }
 
   func applicationDidFinishLaunching(_ aNotification: Notification) {
@@ -30,20 +31,20 @@ class AppDelegate: NSObject, NSApplicationDelegate, ProbePeripheralDelegate {
     // as once connected - it will be remembered and auto-connected. Otherwise
     // the first connect is manual. Then have settings for forgetting /
     // disconnecting a probe
-    if peripheral.state == .disconnected {
-      // TODO: Concurrency
-      Task {
-        logger.debug("Connecting to peripheral: \(peripheral.identifier, privacy: .public)")
-        let probe = try await self.probePeripheralManager.connect(peripheral: peripheral)
-        logger.debug("Connected to peripheral: \(probe.id, privacy: .public)")
-        let context = ModelContext(self.modelContainer)
-        // TODO: Upsert to keep values?
-        // TODO: Name will always be nil here as we don't wait for
-        // characteristics to be read
-        context.insert(Probe(id: probe.id.uuidString, name: probe.deviceName ?? "", temperatureTarget: 65, grillTemperatureTarget: 300))
-        try context.save()
-      }
-    }
+    // if peripheral.state == .disconnected {
+    //   // TODO: Concurrency
+    //   Task {
+    //     logger.debug("Connecting to peripheral: \(peripheral.identifier, privacy: .public)")
+    //     let probe = try await self.probePeripheralManager.connect(peripheral: peripheral)
+    //     logger.debug("Connected to peripheral: \(probe.id, privacy: .public)")
+    //     let context = ModelContext(self.modelContainer)
+    //     // TODO: Upsert to keep values?
+    //     // TODO: Name will always be nil here as we don't wait for
+    //     // characteristics to be read
+    //     context.insert(Probe(id: probe.id.uuidString, name: probe.deviceName ?? "", temperatureTarget: 65, grillTemperatureTarget: 300))
+    //     try context.save()
+    //   }
+    // }
   }
 }
 
@@ -54,7 +55,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, ProbePeripheralDelegate {
     WindowGroup {
       AppView()
         .modelContainer(appDelegate.modelContainer)
-        .environment(\.probePeripheralManager, appDelegate.probePeripheralManager)
+        .environment(
+          \.probePeripheralManager, appDelegate.probePeripheralManager)
     }
   }
 }

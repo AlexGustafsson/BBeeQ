@@ -5,19 +5,20 @@ struct SettingsView: View {
 
   var body: some View {
     VStack {
-          Form {
-            Section("General") {
-              Toggle("Auto connect", isOn: $autoConnect)
-            }
-            Section("Advanced") {
-              Button("Disconnect all probes")  {
+      Form {
+        Section("General") {
+          Toggle("Auto connect", isOn: $autoConnect)
+        }
+        Section("Advanced") {
+          Button("Disconnect all probes") {
 
-              }
-              Button("Forgett all probes") {
+          }
+          Button("Forgett all probes") {
 
-              }
-            }
-          }.padding(5).formStyle(.grouped)
+          }
+        }
+      }
+      .padding(5).formStyle(.grouped)
     }
   }
 }

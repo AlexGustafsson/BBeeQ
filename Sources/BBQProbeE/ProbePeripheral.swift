@@ -1,8 +1,9 @@
-import os
-import Observation
 import CoreBluetooth
+import Observation
+import os
 
-@Observable public class ProbePeripheral: NSObject, Identifiable, CBPeripheralDelegate {
+@Observable
+public class ProbePeripheral: NSObject, Identifiable, CBPeripheralDelegate {
   public var manufacturerName: String?
   public var modelNumber: String?
   public var serialNumber: String?
@@ -17,7 +18,7 @@ import CoreBluetooth
 
   private let peripheral: CBPeripheral
 
-  internal init(peripheral: CBPeripheral)  {
+  internal init(peripheral: CBPeripheral) {
     self.peripheral = peripheral
     self.state = peripheral.state
     super.init()
@@ -26,13 +27,19 @@ import CoreBluetooth
     // peripheral.delegate = self
 
     print("subscribing")
-    guard let probeService = peripheral.services?.first(where: {$0.uuid.uuidString == BBQProbeEServiceUUID}) else {
-    print("failed to subscribe")
+    guard
+      let probeService = peripheral.services?
+        .first(where: { $0.uuid.uuidString == BBQProbeEServiceUUID })
+    else {
+      print("failed to subscribe")
       return
     }
 
-    guard let deviceInformationService = peripheral.services?.first(where: {$0.uuid.uuidString == DeviceInformationServiceUUID}) else {
-    print("failed to subscribe")
+    guard
+      let deviceInformationService = peripheral.services?
+        .first(where: { $0.uuid.uuidString == DeviceInformationServiceUUID })
+    else {
+      print("failed to subscribe")
       return
     }
 
@@ -41,11 +48,11 @@ import CoreBluetooth
       for characteristic in characteristics {
         if characteristic.properties.contains(.read) {
           print("reading \(characteristic.uuid)")
-         peripheral.readValue(for: characteristic)
+          peripheral.readValue(for: characteristic)
         }
         if characteristic.properties.contains(.notify) {
           print("subscribing \(characteristic.uuid)")
-         peripheral.setNotifyValue(true, for: characteristic)
+          peripheral.setNotifyValue(true, for: characteristic)
         }
       }
     }
@@ -54,11 +61,11 @@ import CoreBluetooth
       for characteristic in characteristics {
         if characteristic.properties.contains(.read) {
           print("reading \(characteristic.uuid)")
-         peripheral.readValue(for: characteristic)
+          peripheral.readValue(for: characteristic)
         }
         if characteristic.properties.contains(.notify) {
           print("subscribing \(characteristic.uuid)")
-         peripheral.setNotifyValue(true, for: characteristic)
+          peripheral.setNotifyValue(true, for: characteristic)
         }
       }
     }
@@ -68,35 +75,46 @@ import CoreBluetooth
     return self.peripheral.identifier
   }
 
-  public func peripheral(_: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: (any Error)?) {
-     // TODO: Error handling. For now, let's assume subscriptions work
-     print("notify \(characteristic.uuid) - \(error)")
+  public func peripheral(
+    _: CBPeripheral,
+    didUpdateNotificationStateFor characteristic: CBCharacteristic,
+    error: (any Error)?
+  ) {
+    // TODO: Error handling. For now, let's assume subscriptions work
+    print("notify \(characteristic.uuid) - \(error)")
   }
 
-  public func peripheral(_: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: (any Error)?) {
+  public func peripheral(
+    _: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic,
+    error: (any Error)?
+  ) {
     print("\(characteristic.uuid): \(characteristic.value?.hex)")
 
     switch characteristic.uuid.uuidString {
-      case DeviceInformationManufacturerNameCharacteristicUUID:
-        self.manufacturerName = characteristic.value?.ascii
-      case DeviceInformationFirmwareRevisionCharacteristicUUID:
-        self.firmwareRevision = characteristic.value?.ascii
-      case DeviceInformationModelNumberCharacteristicUUID:
-        self.modelNumber = characteristic.value?.ascii
-      case DeviceInformationSerialNumberCharacteristicUUID:
-        self.serialNumber = characteristic.value?.ascii
-      case BBQProbeETemperatureEventsCharacteristicUUID:
-        self.probeTemperature = convertReadingToDegrees(value: characteristic.value!.uint16le(at: 2))
-        self.grillTemperature = convertReadingToDegrees(value: characteristic.value!.uint16le(at: 4))
-      case BBQProbeEDeviceNameCharacteristicUUID:
-        self.deviceName = characteristic.value?.ascii
-      default:
-        // Do nothing
-        break
+    case DeviceInformationManufacturerNameCharacteristicUUID:
+      self.manufacturerName = characteristic.value?.ascii
+    case DeviceInformationFirmwareRevisionCharacteristicUUID:
+      self.firmwareRevision = characteristic.value?.ascii
+    case DeviceInformationModelNumberCharacteristicUUID:
+      self.modelNumber = characteristic.value?.ascii
+    case DeviceInformationSerialNumberCharacteristicUUID:
+      self.serialNumber = characteristic.value?.ascii
+    case BBQProbeETemperatureEventsCharacteristicUUID:
+      self.probeTemperature = convertReadingToDegrees(
+        value: characteristic.value!.uint16le(at: 2))
+      self.grillTemperature = convertReadingToDegrees(
+        value: characteristic.value!.uint16le(at: 4))
+    case BBQProbeEDeviceNameCharacteristicUUID:
+      self.deviceName = characteristic.value?.ascii
+    default:
+      // Do nothing
+      break
     }
   }
 
-  public func peripheral(didDisconnect peripheral: CBPeripheral, error: (any Error)?) {
+  public func peripheral(
+    didDisconnect peripheral: CBPeripheral, error: (any Error)?
+  ) {
     print("periph disconnect")
     self.state = peripheral.state
   }

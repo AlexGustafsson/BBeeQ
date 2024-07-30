@@ -23,7 +23,7 @@ public protocol ProbePeripheralDelegate {
   func probePeripheralManager(didDiscover: CBPeripheral)
 }
 
-public class ProbePeripheralManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
+@Observable public class ProbePeripheralManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
   private var centralManager: CBCentralManager!
   private var delegate: ProbePeripheralDelegate
 

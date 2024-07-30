@@ -16,7 +16,7 @@ let package = Package(
     .executableTarget(
       name: "BBeeQ",
       dependencies: [
-        "BBQProbeE",
+        "BBQProbeE"
       ],
       resources: [
 
@@ -50,6 +50,6 @@ let package = Package(
     .testTarget(
       name: "BBQProbeETests",
       dependencies: [
-        "BBQProbeE",
+        "BBQProbeE"
       ]),
   ])

@@ -1,5 +1,5 @@
-import SwiftUI
 import BBQProbeE
+import SwiftUI
 
 extension EnvironmentValues {
   // TODO: Use @Entry of Swift 6?

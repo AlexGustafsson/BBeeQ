@@ -7,16 +7,16 @@ struct AppView: View {
     TabView(selection: $selectedTab) {
       ProbesView()
         .tabItem {
-            Label("Thermometer", systemImage: "thermometer.medium")
+          Label("Thermometer", systemImage: "thermometer.medium")
         }
 
       ChartsView()
         .tabItem {
-            Label("Charts", systemImage: "chart.xyaxis.line")
+          Label("Charts", systemImage: "chart.xyaxis.line")
         }
       SettingsView()
         .tabItem {
-            Label("Settings", systemImage: "gearshape")
+          Label("Settings", systemImage: "gearshape")
         }
     }
   }
