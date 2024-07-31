@@ -14,7 +14,7 @@ struct ProbesView: View {
 
   var body: some View {
     ZStack(alignment: .bottomTrailing) {
-      List {
+      ScrollView {
         // TODO: Draggable to move within list
         ForEach(probes) { probe in
           ProbeView(
@@ -35,6 +35,9 @@ struct ProbesView: View {
       }
       .scrollContentBackground(.hidden)
       .background(.clear)
+      #if os(iOS)
+        .background(Color(UIColor.systemGroupedBackground))
+      #endif
 
       // FAB to add
       Button {
@@ -63,7 +66,10 @@ struct ProbesView: View {
       .sheet(isPresented: $presentAddProbeSheet) {
         // Do nothing
       } content: {
-        AddProbesView().frame(width: 520)
+        AddProbesView()
+          #if os(macOS)
+            .frame(width: 520)
+          #endif
       }
     }
   }

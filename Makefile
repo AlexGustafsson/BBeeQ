@@ -26,7 +26,7 @@ run:
 
 .PHONY: run-ios
 # Run the program on iOS
-run-ios:
+run-ios: ipa
 	xcrun simctl install ${IOS_SIMULATOR_NAME} .build/ios/BBeeQ.app
 	xcrun simctl launch --console ${IOS_SIMULATOR_NAME} se.axgn.BBeeQ
 

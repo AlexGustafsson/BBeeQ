@@ -18,7 +18,10 @@ struct SettingsView: View {
           }
         }
       }
-      .padding(5).formStyle(.grouped)
+     .formStyle(.grouped)
+     #if os(macOS)
+       .padding(5)
+      #endif
     }
   }
 }

@@ -38,7 +38,13 @@ struct AddProbesView: View {
           }
         }
       }
-      .padding(5).formStyle(.grouped)
+      .formStyle(.grouped)
+      #if os(macOS)
+        .padding(5)
+      #endif
+      #if (os(iOS))
+        .safeAreaPadding()
+      #endif
 
       // Footer
       HStack {
@@ -95,7 +101,12 @@ struct AddProbesView: View {
         .disabled(selection.count == 0 || adding)
         .keyboardShortcut(.defaultAction)
       }
+      #if (os(macOS))
       .padding(20)
+      #endif
     }
+    #if (os(iOS))
+        .safeAreaPadding()
+      #endif
   }
 }

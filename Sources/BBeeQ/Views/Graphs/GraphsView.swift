@@ -199,6 +199,10 @@ struct ChartsView: View {
 
       // TODO: Probe cards and a single grill card with average and min max area
       // ruler
-    }
+    }.scrollContentBackground(.hidden)
+      .background(.clear)
+      #if os(iOS)
+        .background(Color(UIColor.systemGroupedBackground))
+      #endif
   }
 }
