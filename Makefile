@@ -1,3 +1,11 @@
+# IOS_VERSION=$(shell xcrun --sdk iphoneos --show-sdk-version)
+# IOS_SDK=$(shell xcrun --sdk iphoneos --show-sdk-path)
+# IOS_TARGET=arm64-apple-ios${IOS_VERSION}
+IOS_VERSION=$(shell xcrun --sdk iphoneos --show-sdk-version)
+IOS_SDK=$(shell xcrun --sdk iphonesimulator --show-sdk-path)
+IOS_TARGET=x86_64-apple-ios17-simulator
+IOS_SIMULATOR_NAME=booted
+
 .PHONY: all
 all: app installer
 
@@ -6,10 +14,21 @@ all: app installer
 build:
 	swift build --configuration release
 
+.PHONY: build-ios
+# Build for iOS
+build-ios:
+	swift build --configuration release --scratch-path .build/ios -Xswiftc -sdk -Xswiftc ${IOS_SDK} -Xswiftc -target -Xswiftc ${IOS_TARGET} -Xcc -isysroot -Xcc ${IOS_SDK} -Xcc --target=${IOS_TARGET}
+
 .PHONY: run
 # Run the program
 run:
 	swift run BBeeQ
+
+.PHONY: run-ios
+# Run the program on iOS
+run-ios:
+	xcrun simctl install ${IOS_SIMULATOR_NAME} .build/ios/BBeeQ.app
+	xcrun simctl launch --console ${IOS_SIMULATOR_NAME} se.axgn.BBeeQ
 
 .PHONY: debug
 # Run the program in debug mode
@@ -61,6 +80,13 @@ ifdef CODESIGN_IDENTITY
 	plutil -convert xml1 Sources/BBeeQ/Resources/Entitlements.plist
 	codesign --force --verbose --entitlements Sources/BBeeQ/Resources/Entitlements.plist --sign "$(CODESIGN_IDENTITY)" .build/BBeeQ.app
 endif
+
+.PHONY: ipa
+ipa: build-ios .build/AppIcon.icns
+	mkdir -p .build/ios/BBeeQ.app
+	cp .build/ios/release/BBeeQ .build/ios/BBeeQ.app
+	cp Sources/BBeeQ/Resources/Info.plist .build/ios/BBeeQ.app
+	cp Sources/BBeeQ/Resources/Entitlements.plist .build/ios/BBeeQ.app
 
 .PHONY: installer
 installer:

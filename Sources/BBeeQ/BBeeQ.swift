@@ -7,7 +7,7 @@ import os
 
 private let logger = Logger(
   subsystem: Bundle.main.bundleIdentifier!, category: "Main")
-
+#if os(macOS)
 class AppDelegate: NSObject, NSApplicationDelegate, ProbePeripheralDelegate {
   public let modelContainer: ModelContainer
   public var probePeripheralManager: ProbePeripheralManager!
@@ -60,3 +60,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, ProbePeripheralDelegate {
     }
   }
 }
+#endif
+
+#if os(iOS)
+@main struct BBeeQ: App {
+
+  var body: some Scene {
+    WindowGroup {
+      Text("Hello, World!")
+    }
+  }
+}
+#endif

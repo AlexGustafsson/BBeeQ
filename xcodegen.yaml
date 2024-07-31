@@ -1,0 +1,16 @@
+name: BBeeQ
+options:
+  bundleIdPrefix: se.axgn
+targets:
+  BBeeQ:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.5"
+    sources: [Sources/BBeeQ]
+    settings:
+      INFOPLIST_FILE: Sources/BBeeQ/Resources/Info.plist
+    dependencies:
+      - package: BBQProbeE
+packages:
+  BBQProbeE:
+    path: .

@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-  name: "BBeeQ", platforms: [.macOS(.v14)],
+  name: "BBeeQ", platforms: [.macOS(.v14), .iOS(.v17)],
   products: [
     .executable(name: "BBeeQ", targets: ["BBeeQ"]),
     .library(name: "BBQProbeE", targets: ["BBQProbeE"]),
