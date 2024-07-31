@@ -13,7 +13,7 @@ struct SettingsView: View {
           Button("Disconnect all probes") {
 
           }
-          Button("Forgett all probes") {
+          Button("Forget all probes") {
 
           }
         }
