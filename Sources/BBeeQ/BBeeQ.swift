@@ -28,24 +28,27 @@ private let logger = Logger(
     }
 
     func probePeripheralManager(didDiscover peripheral: CBPeripheral) {
-      // TODO: Only show discovered, click once to connect. If the model is saved
-      // as once connected - it will be remembered and auto-connected. Otherwise
-      // the first connect is manual. Then have settings for forgetting /
-      // disconnecting a probe
-      // if peripheral.state == .disconnected {
-      //   // TODO: Concurrency
-      //   Task {
-      //     logger.debug("Connecting to peripheral: \(peripheral.identifier, privacy: .public)")
-      //     let probe = try await self.probePeripheralManager.connect(peripheral: peripheral)
-      //     logger.debug("Connected to peripheral: \(probe.id, privacy: .public)")
-      //     let context = ModelContext(self.modelContainer)
-      //     // TODO: Upsert to keep values?
-      //     // TODO: Name will always be nil here as we don't wait for
-      //     // characteristics to be read
-      //     context.insert(Probe(id: probe.id.uuidString, name: probe.deviceName ?? "", temperatureTarget: 65, grillTemperatureTarget: 300))
-      //     try context.save()
-      //   }
-      // }
+      let peripheralId = peripheral.identifier.uuidString
+      // Automatically connect to known probes
+      if peripheral.state == .disconnected {
+        // TODO: Concurrency
+        Task {
+          let modelContext = ModelContext(self.modelContainer)
+
+          let descriptor = FetchDescriptor<Probe>(
+            predicate: #Predicate { $0.id == peripheralId })
+          let count = try modelContext.fetchCount(descriptor)
+
+          if count > 0 {
+            logger.debug(
+              "Connecting to peripheral: \(peripheralId, privacy: .public)")
+            try await self.probePeripheralManager.connect(
+              peripheral: peripheral)
+            logger.debug(
+              "Connected to peripheral: \(peripheralId, privacy: .public)")
+          }
+        }
+      }
     }
   }
 
@@ -124,24 +127,27 @@ private let logger = Logger(
     }
 
     func probePeripheralManager(didDiscover peripheral: CBPeripheral) {
-      // TODO: Only show discovered, click once to connect. If the model is saved
-      // as once connected - it will be remembered and auto-connected. Otherwise
-      // the first connect is manual. Then have settings for forgetting /
-      // disconnecting a probe
-      // if peripheral.state == .disconnected {
-      //   // TODO: Concurrency
-      //   Task {
-      //     logger.debug("Connecting to peripheral: \(peripheral.identifier, privacy: .public)")
-      //     let probe = try await self.probePeripheralManager.connect(peripheral: peripheral)
-      //     logger.debug("Connected to peripheral: \(probe.id, privacy: .public)")
-      //     let context = ModelContext(self.modelContainer)
-      //     // TODO: Upsert to keep values?
-      //     // TODO: Name will always be nil here as we don't wait for
-      //     // characteristics to be read
-      //     context.insert(Probe(id: probe.id.uuidString, name: probe.deviceName ?? "", temperatureTarget: 65, grillTemperatureTarget: 300))
-      //     try context.save()
-      //   }
-      // }
+      // Automatically connect to known probes
+      if peripheral.state == .disconnected {
+        // TODO: Concurrency
+        Task {
+          let modelContext = ModelContext(self.modelContainer)
+
+          let descriptor = FetchDescriptor<Probe>(
+            predicate: #Predicate { $0.id == peripheral.identifier.uuidString })
+          let count = try modelContext.fetchCount(descriptor)
+
+          if count > 0 {
+            logger.debug(
+              "Connecting to peripheral: \(peripheral.identifier, privacy: .public)"
+            )
+            let probe = try await self.probePeripheralManager.connect(
+              peripheral: peripheral)
+            logger.debug(
+              "Connected to peripheral: \(probe.id, privacy: .public)")
+          }
+        }
+      }
     }
   }
 

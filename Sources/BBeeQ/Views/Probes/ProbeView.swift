@@ -5,11 +5,17 @@ import SwiftUI
 
 struct ProbeView: View {
   @State var probe: Probe
-  @State var peripheral: ProbePeripheral?
 
   @State private var presentSheet = false
 
   @Query private var probes: [Probe]
+
+  @Environment(\.probePeripheralManager) var probePeripheralManager
+
+  private var peripheral: ProbePeripheral? {
+    return probePeripheralManager?
+      .connections[UUID(uuidString: probe.id)!]
+  }
 
   var body: some View {
     HStack {

@@ -15,6 +15,52 @@ struct AddProbesView: View {
 
   @Query private var probes: [Probe]
 
+  private func addSelection() {
+    self.adding = true
+    Task {
+      defer { self.adding = false }
+      guard let manager = self.probePeripheralManager else {
+        return
+      }
+
+      do {
+        try await withThrowingTaskGroup(of: ProbePeripheral.self) {
+          taskGroup in
+          for uuid in self.selection {
+            guard let peripheral = manager.discovered[uuid] else {
+              continue
+            }
+
+            taskGroup.addTask {
+              let probe = try await self.probePeripheralManager!
+                .connect(peripheral: peripheral)
+
+              let context = ModelContext(modelContext.container)
+              // TODO: Name is always empty as we haven't gotten the
+              // device name characteristic yet
+              context.insert(
+                Probe(
+                  id: probe.id.uuidString,
+                  name: probe.deviceName ?? "Probe \(probes.count + 1)",
+                  temperatureTarget: 65, grillTemperatureTarget: 300))
+              try context.save()
+
+              // TODO: Swift breaks if we don't state of: ProbePeripheral
+              // and return something
+              return probe
+            }
+          }
+        }
+      } catch {
+        print("failed")
+        // TODO: Handle errors
+        return
+      }
+
+      dismiss()
+    }
+  }
+
   var body: some View {
     VStack {
       Form {
@@ -54,49 +100,7 @@ struct AddProbesView: View {
         }
         .disabled(adding)
         Button(selection.count == 0 ? "Add" : "Add \(selection.count)") {
-          self.adding = true
-          Task {
-            defer { self.adding = false }
-            guard let manager = self.probePeripheralManager else {
-              return
-            }
-
-            do {
-              try await withThrowingTaskGroup(of: ProbePeripheral.self) {
-                taskGroup in
-                for id in selection {
-                  guard let peripheral = manager.discovered[id] else {
-                    continue
-                  }
-
-                  taskGroup.addTask {
-                    let probe = try await self.probePeripheralManager!
-                      .connect(peripheral: peripheral)
-
-                    let context = ModelContext(modelContext.container)
-                    // TODO: Name is always empty as we haven't gotten the
-                    // device name characteristic yet
-                    context.insert(
-                      Probe(
-                        id: probe.id.uuidString,
-                        name: probe.deviceName ?? "Probe \(probes.count + 1)",
-                        temperatureTarget: 65, grillTemperatureTarget: 300))
-                    try context.save()
-
-                    // TODO: Swift breaks if we don't state of: ProbePeripheral
-                    // and return something
-                    return probe
-                  }
-                }
-              }
-            } catch {
-              print("failed")
-              // TODO: Handle errors
-              return
-            }
-
-            dismiss()
-          }
+          self.addSelection()
         }
         .disabled(selection.count == 0 || adding)
         .keyboardShortcut(.defaultAction)

@@ -74,10 +74,10 @@ public class ProbePeripheralManager: NSObject, CBCentralManagerDelegate,
     return p
   }
 
-  public func disconnect(peripheral: CBPeripheral) {
-    self.centralManager.cancelPeripheralConnection(peripheral)
-    self.connections[peripheral.identifier] = nil
-    self.connectionAttempts[peripheral.identifier] = nil
+  public func disconnect(peripheral: ProbePeripheral) {
+    self.centralManager.cancelPeripheralConnection(peripheral.peripheral)
+    self.connections[peripheral.id] = nil
+    self.connectionAttempts[peripheral.id] = nil
   }
 
   public func centralManagerDidUpdateState(_ manager: CBCentralManager) {

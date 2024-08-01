@@ -16,7 +16,7 @@ public class ProbePeripheral: NSObject, Identifiable, CBPeripheralDelegate {
   // Basically reflect peripheral.state, but keep it observable
   public var state: CBPeripheralState
 
-  private let peripheral: CBPeripheral
+  internal let peripheral: CBPeripheral
 
   internal init(peripheral: CBPeripheral) {
     self.peripheral = peripheral

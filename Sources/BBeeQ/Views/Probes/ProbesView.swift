@@ -18,9 +18,8 @@ struct ProbesView: View {
         // TODO: Draggable to move within list
         ForEach(probes) { probe in
           ProbeView(
-            probe: probe,
-            peripheral: probePeripheralManager?
-              .connections[UUID(uuidString: probe.id)!])
+            probe: probe
+          )
         }
 
         if probes.count == 0 {
