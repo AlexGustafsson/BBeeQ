@@ -102,11 +102,11 @@ struct AddProbesView: View {
         .keyboardShortcut(.defaultAction)
       }
       #if (os(macOS))
-      .padding(20)
+        .padding(20)
       #endif
     }
     #if (os(iOS))
-        .safeAreaPadding()
-      #endif
+      .safeAreaPadding()
+    #endif
   }
 }

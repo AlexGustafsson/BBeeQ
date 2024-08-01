@@ -26,7 +26,7 @@ run:
 
 .PHONY: run-ios
 # Run the program on iOS
-run-ios: ipa
+run-ios: app-ios
 	xcrun simctl install ${IOS_SIMULATOR_NAME} .build/ios/BBeeQ.app
 	xcrun simctl launch --console ${IOS_SIMULATOR_NAME} se.axgn.BBeeQ
 
@@ -81,12 +81,17 @@ ifdef CODESIGN_IDENTITY
 	codesign --force --verbose --entitlements Sources/BBeeQ/Resources/Entitlements.plist --sign "$(CODESIGN_IDENTITY)" .build/BBeeQ.app
 endif
 
-.PHONY: ipa
-ipa: build-ios .build/AppIcon.icns
-	mkdir -p .build/ios/BBeeQ.app
+.PHONY: app-ios
+app-ios: build-ios .build/AppIcon.icns
+	mkdir -p .build/ios/BBeeQWidget.appex
+	cp .build/ios/release/BBeeQWidget .build/ios/BBeeQWidget.appex
+	cp Sources/BBeeQWidget/Resources/Info.plist .build/ios/BBeeQWidget.appex
+
+	mkdir -p .build/ios/BBeeQ.app/PlugIns
 	cp .build/ios/release/BBeeQ .build/ios/BBeeQ.app
 	cp Sources/BBeeQ/Resources/Info.plist .build/ios/BBeeQ.app
 	cp Sources/BBeeQ/Resources/Entitlements.plist .build/ios/BBeeQ.app
+	cp -r .build/ios/BBeeQWidget.appex .build/ios/BBeeQ.app/PlugIns
 
 .PHONY: installer
 installer:
