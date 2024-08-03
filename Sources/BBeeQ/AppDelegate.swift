@@ -141,11 +141,7 @@ private let logger = Logger(
         UNNotificationPresentationOptions
       ) -> Void
     ) {
-      // Update the app interface directly.
-
-      // Show a banner
-      completionHandler(.banner)
-
+      completionHandler([.banner, .sound])
     }
 
     func probePeripheralManager(didDiscover peripheral: CBPeripheral) {

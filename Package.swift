@@ -20,7 +20,7 @@ let package = Package(
         "BBQProbeE"
       ],
       resources: [
-
+        .copy("Sources/BBeeQ/Resources/thermometer.aiff")
       ],
       swiftSettings: [
         .enableExperimentalFeature("StrictConcurrency=complete")

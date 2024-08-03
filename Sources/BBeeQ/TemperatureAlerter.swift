@@ -62,6 +62,7 @@ actor TemperatureAlerter {
     let content = UNMutableNotificationContent()
     content.title = "Target \(thermometerLabel) temperature reached"
     content.body = "\(probeName) is at (\(temperature)°C)"
+    content.sound = UNNotificationSound(named: UNNotificationSoundName("thermometer.aiff"))
 
     await Notifications.shared.addImmediate(
       identifier: UUID().uuidString, content: content)
