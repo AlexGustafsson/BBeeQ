@@ -3,8 +3,8 @@ import Combine
 import CoreBluetooth
 import SwiftData
 import SwiftUI
-import os
 import UserNotifications
+import os
 
 private let logger = Logger(
   subsystem: Bundle.main.bundleIdentifier!, category: "Main")
@@ -20,7 +20,9 @@ private let logger = Logger(
       super.init()
       self.probePeripheralManager = ProbePeripheralManager(
         delegate: self, queue: DispatchQueue.main)
-      self.timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(timerAction), userInfo: nil, repeats: true)
+      self.timer = Timer.scheduledTimer(
+        timeInterval: 1.0, target: self, selector: #selector(timerAction),
+        userInfo: nil, repeats: true)
     }
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
@@ -37,41 +39,43 @@ private let logger = Logger(
     @objc func timerAction() {
       let modelContext = ModelContext(self.modelContainer)
 
-       for probePeripheral in self.probePeripheralManager.connections.values {
+      for probePeripheral in self.probePeripheralManager.connections.values {
         let peripheralId = probePeripheral.id.uuidString
         let descriptor = FetchDescriptor<Probe>(
-            predicate: #Predicate { $0.id == peripheralId })
+          predicate: #Predicate { $0.id == peripheralId })
 
-          do {
-            guard let probe = (try modelContext.fetch(descriptor)).first else {
-              continue
-            }
-
-            if let probeTemperature = probePeripheral.probeTemperature {
-              if probeTemperature >= probe.temperatureTarget {
-                let content = UNMutableNotificationContent()
-                content.title = "Target probe temperature reached"
-                content.body = "\(probe.name) is at (\(probeTemperature)°C)"
-                Task {
-                  await Notifications.shared.addImmediate(identifier: UUID().uuidString, content: content)
-                }
-              }
-            }
-
-            if let grillTemperature = probePeripheral.grillTemperature {
-              if grillTemperature >= probe.temperatureTarget {
-                let content = UNMutableNotificationContent()
-                content.title = "Target grill temperature reached"
-                content.body = "\(probe.name) is at (\(grillTemperature)°C)"
-                Task {
-                  await Notifications.shared.addImmediate(identifier: UUID().uuidString, content: content)
-                }
-              }
-            }
-          } catch {
-            logger.error("Failed to check probe: \(error, privacy: .public)")
+        do {
+          guard let probe = (try modelContext.fetch(descriptor)).first else {
+            continue
           }
-       }
+
+          if let probeTemperature = probePeripheral.probeTemperature {
+            if probeTemperature >= probe.temperatureTarget {
+              let content = UNMutableNotificationContent()
+              content.title = "Target probe temperature reached"
+              content.body = "\(probe.name) is at (\(probeTemperature)°C)"
+              Task {
+                await Notifications.shared.addImmediate(
+                  identifier: UUID().uuidString, content: content)
+              }
+            }
+          }
+
+          if let grillTemperature = probePeripheral.grillTemperature {
+            if grillTemperature >= probe.temperatureTarget {
+              let content = UNMutableNotificationContent()
+              content.title = "Target grill temperature reached"
+              content.body = "\(probe.name) is at (\(grillTemperature)°C)"
+              Task {
+                await Notifications.shared.addImmediate(
+                  identifier: UUID().uuidString, content: content)
+              }
+            }
+          }
+        } catch {
+          logger.error("Failed to check probe: \(error, privacy: .public)")
+        }
+      }
     }
 
     func probePeripheralManager(didDiscover peripheral: CBPeripheral) {
@@ -169,41 +173,43 @@ private let logger = Logger(
     @objc func timerAction() {
       let modelContext = ModelContext(self.modelContainer)
 
-       for probePeripheral in self.probePeripheralManager.connections.values {
+      for probePeripheral in self.probePeripheralManager.connections.values {
         let peripheralId = probePeripheral.id.uuidString
         let descriptor = FetchDescriptor<Probe>(
-            predicate: #Predicate { $0.id == peripheralId })
+          predicate: #Predicate { $0.id == peripheralId })
 
-          do {
-            guard let probe = (try modelContext.fetch(descriptor)).first else {
-              continue
-            }
-
-            if let probeTemperature = probePeripheral.probeTemperature {
-              if probeTemperature >= probe.temperatureTarget {
-                let content = UNMutableNotificationContent()
-                content.title = "Target probe temperature reached"
-                content.body = "\(probe.name) is at (\(probeTemperature)°C)"
-                Task {
-                  await Notifications.shared.addImmediate(identifier: UUID().uuidString, content: content)
-                }
-              }
-            }
-
-            if let grillTemperature = probePeripheral.grillTemperature {
-              if grillTemperature >= probe.temperatureTarget {
-                let content = UNMutableNotificationContent()
-                content.title = "Target grill temperature reached"
-                content.body = "\(probe.name) is at (\(grillTemperature)°C)"
-                Task {
-                  await Notifications.shared.addImmediate(identifier: UUID().uuidString, content: content)
-                }
-              }
-            }
-          } catch {
-            logger.error("Failed to check probe: \(error, privacy: .public)")
+        do {
+          guard let probe = (try modelContext.fetch(descriptor)).first else {
+            continue
           }
-       }
+
+          if let probeTemperature = probePeripheral.probeTemperature {
+            if probeTemperature >= probe.temperatureTarget {
+              let content = UNMutableNotificationContent()
+              content.title = "Target probe temperature reached"
+              content.body = "\(probe.name) is at (\(probeTemperature)°C)"
+              Task {
+                await Notifications.shared.addImmediate(
+                  identifier: UUID().uuidString, content: content)
+              }
+            }
+          }
+
+          if let grillTemperature = probePeripheral.grillTemperature {
+            if grillTemperature >= probe.temperatureTarget {
+              let content = UNMutableNotificationContent()
+              content.title = "Target grill temperature reached"
+              content.body = "\(probe.name) is at (\(grillTemperature)°C)"
+              Task {
+                await Notifications.shared.addImmediate(
+                  identifier: UUID().uuidString, content: content)
+              }
+            }
+          }
+        } catch {
+          logger.error("Failed to check probe: \(error, privacy: .public)")
+        }
+      }
     }
 
     func probePeripheralManager(didDiscover peripheral: CBPeripheral) {

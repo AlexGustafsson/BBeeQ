@@ -3,9 +3,8 @@ import Combine
 import CoreBluetooth
 import SwiftData
 import SwiftUI
-import os
 import UserNotifications
-
+import os
 
 #if os(macOS)
   @main struct BBeeQ: App {

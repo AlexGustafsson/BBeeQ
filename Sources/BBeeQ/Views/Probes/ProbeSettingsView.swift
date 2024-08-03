@@ -1,5 +1,9 @@
 import BBQProbeE
 import SwiftUI
+import os
+
+private let logger = Logger(
+  subsystem: Bundle.main.bundleIdentifier!, category: "UI/ProbeSettings")
 
 struct ProbeSettingsView: View {
   @State var probe: Probe
@@ -19,6 +23,23 @@ struct ProbeSettingsView: View {
 
   @Environment(\.modelContext) private var modelContext
   @Environment(\.dismiss) private var dismiss
+  @Environment(\.probePeripheralManager) private var probePeripheralManager
+
+  private func forget() {
+    if let peripheral = peripheral {
+      probePeripheralManager?.disconnect(peripheral: peripheral)
+    }
+
+    do {
+      modelContext.delete(probe)
+      try modelContext.save()
+    } catch {
+      logger.error(
+        "Failed to delete probe: \(error, privacy: .public)")
+    }
+
+    dismiss()
+  }
 
   var body: some View {
     VStack {
@@ -70,16 +91,11 @@ struct ProbeSettingsView: View {
           LabeledContent("Firmware revision") {
             Text(peripheral?.firmwareRevision ?? "")
           }
-          // TODO: Name text field
-          // TODO: Connect or disconnect, depending on state
-          Button("Connect", role: .destructive) {
-
-          }
           // TODO: Remove from model data. Nice to keep for history etc.?
           // Feature creep: Store "sessions" i.e. a continous use, see data,
           // name courses
           Button("Forget", role: .destructive) {
-
+            self.forget()
           }
         }
       }
