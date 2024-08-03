@@ -25,6 +25,10 @@ private let logger = Logger(
       DispatchQueue.main.async {
         NSApp.setActivationPolicy(.accessory)
       }
+
+      Task {
+        await Notifications.shared.requestAccess()
+      }
     }
 
     func probePeripheralManager(didDiscover peripheral: CBPeripheral) {
@@ -123,6 +127,11 @@ private let logger = Logger(
         logger.error("Failed to start activity \(error, privacy: .public)")
         print("Failed")
       }
+
+      Task {
+        await Notifications.shared.requestAccess()
+      }
+
       return true
     }
 
@@ -133,8 +142,9 @@ private let logger = Logger(
         Task {
           let modelContext = ModelContext(self.modelContainer)
 
+          let peripheralId = peripheral.identifier.uuidString
           let descriptor = FetchDescriptor<Probe>(
-            predicate: #Predicate { $0.id == peripheral.identifier.uuidString })
+            predicate: #Predicate { $0.id == peripheralId })
           let count = try modelContext.fetchCount(descriptor)
 
           if count > 0 {

@@ -2,6 +2,7 @@ import BBQProbeE
 import CoreBluetooth
 import SwiftData
 import SwiftUI
+import UserNotifications
 
 struct AddProbesView: View {
   @State private var selection: Set<UUID> = Set()
@@ -51,6 +52,14 @@ struct AddProbesView: View {
             }
           }
         }
+
+        let content = UNMutableNotificationContent()
+        content.title = "Title"
+        content.body = "Body"
+        content.sound = UNNotificationSound.default
+        content.interruptionLevel = .timeSensitive
+        await Notifications.shared.addImmediate(
+          identifier: UUID().uuidString, content: content)
       } catch {
         print("failed")
         // TODO: Handle errors

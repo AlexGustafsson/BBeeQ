@@ -17,7 +17,8 @@ build:
 .PHONY: build-ios
 # Build for iOS
 build-ios:
-	swift build --configuration release --scratch-path .build/ios -Xswiftc -sdk -Xswiftc ${IOS_SDK} -Xswiftc -target -Xswiftc ${IOS_TARGET} -Xcc -isysroot -Xcc ${IOS_SDK} -Xcc --target=${IOS_TARGET} --product BBeeQ --product BBeeQWidget
+	swift build --configuration release --scratch-path .build/ios -Xswiftc -sdk -Xswiftc ${IOS_SDK} -Xswiftc -target -Xswiftc ${IOS_TARGET} -Xcc -isysroot -Xcc ${IOS_SDK} -Xcc --target=${IOS_TARGET} --product BBeeQ
+	swift build --configuration release --scratch-path .build/ios -Xswiftc -sdk -Xswiftc ${IOS_SDK} -Xswiftc -target -Xswiftc ${IOS_TARGET} -Xcc -isysroot -Xcc ${IOS_SDK} -Xcc --target=${IOS_TARGET} --product BBeeQWidget
 
 .PHONY: run
 # Run the program
@@ -74,11 +75,12 @@ test:
 app: build .build/AppIcon.icns
 	mkdir -p .build/BBeeQ.app/Contents/MacOS
 	cp .build/release/BBeeQ .build/BBeeQ.app/Contents/MacOS
+	cp Sources/BBeeQ/Resources/Info.plist .build/BBeeQ.app/Contents
 	mkdir -p .build/BBeeQ.app/Contents/Resources
 	cp .build/AppIcon.icns .build/BBeeQ.app/Contents/Resources/AppIcon.icns
 ifdef CODESIGN_IDENTITY
 	plutil -convert xml1 Sources/BBeeQ/Resources/Entitlements.plist
-	codesign --force --verbose --entitlements Sources/BBeeQ/Resources/Entitlements.plist --sign "$(CODESIGN_IDENTITY)" .build/BBeeQ.app
+	codesign --force --verbose=4 --entitlements Sources/BBeeQ/Resources/Entitlements.plist --sign "$(CODESIGN_IDENTITY)" .build/BBeeQ.app
 endif
 
 .PHONY: app-ios
