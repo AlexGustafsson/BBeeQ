@@ -12,12 +12,12 @@ all: app installer
 .PHONY: build
 # Build BBeeQ
 build:
-	swift build --configuration release
+	swift build --configuration release --product BBeeQ
 
 .PHONY: build-ios
 # Build for iOS
 build-ios:
-	swift build --configuration release --scratch-path .build/ios -Xswiftc -sdk -Xswiftc ${IOS_SDK} -Xswiftc -target -Xswiftc ${IOS_TARGET} -Xcc -isysroot -Xcc ${IOS_SDK} -Xcc --target=${IOS_TARGET}
+	swift build --configuration release --scratch-path .build/ios -Xswiftc -sdk -Xswiftc ${IOS_SDK} -Xswiftc -target -Xswiftc ${IOS_TARGET} -Xcc -isysroot -Xcc ${IOS_SDK} -Xcc --target=${IOS_TARGET} --product BBeeQ --product BBeeQWidget
 
 .PHONY: run
 # Run the program
