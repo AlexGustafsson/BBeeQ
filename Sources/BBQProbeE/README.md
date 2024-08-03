@@ -29,11 +29,8 @@ It also exposes a service called `FB00` with the following characteristics:
   - `13`: `13000000` - stop work
   -
 - `FB04` - Unknown. Response to write?
-- `FB05` - Status events (e.g. `0300000000FF`, `030002AF01FF`)
+- `FB05` - Status events (e.g. `0300000000FF`, `0301000000FF`, `030002AF01FF`)
   - Byte 1 - battery low warning bool 1/0
-  -
-
-
 
 Notes:
 

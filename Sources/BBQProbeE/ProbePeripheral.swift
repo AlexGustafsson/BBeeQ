@@ -12,6 +12,7 @@ public class ProbePeripheral: NSObject, Identifiable, CBPeripheralDelegate {
   public var deviceName: String?
   public var grillTemperature: Double?
   public var probeTemperature: Double?
+  public var batteryLow: Bool?
 
   // Basically reflect peripheral.state, but keep it observable
   public var state: CBPeripheralState
@@ -106,6 +107,18 @@ public class ProbePeripheral: NSObject, Identifiable, CBPeripheralDelegate {
         value: characteristic.value!.uint16le(at: 4))
     case BBQProbeEDeviceNameCharacteristicUUID:
       self.deviceName = characteristic.value?.ascii
+    case BBQProbeEStatusEventsCharacteristicUUID:
+      if let value = characteristic.value {
+        switch value[1] {
+        case 0:
+          self.batteryLow = false
+        case 1:
+          self.batteryLow = true
+        default:
+          // Unknown case - should only be 0/1
+          self.batteryLow = nil
+        }
+      }
     default:
       // Do nothing
       break

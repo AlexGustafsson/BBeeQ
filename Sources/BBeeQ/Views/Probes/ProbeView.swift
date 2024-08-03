@@ -26,6 +26,11 @@ struct ProbeView: View {
           if peripheral?.state != .connected {
             Image(systemName: "wifi.slash").foregroundStyle(.orange)
           }
+          if peripheral?.batteryLow == true {
+            // TODO: Blink
+            Image(systemName: "battery.25percent").foregroundStyle(.orange)
+              .blinking()
+          }
           Label {
             Text(
               "\(Int(peripheral?.probeTemperature?.rounded() ?? 0))°C/\(Int(probe.temperatureTarget.rounded()))°C"

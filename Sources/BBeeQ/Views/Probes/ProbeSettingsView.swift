@@ -47,6 +47,11 @@ struct ProbeSettingsView: View {
           LabeledContent("Grill temperature") {
             Text(peripheral?.grillTemperature?.formatted(.number) ?? "")
           }
+          LabeledContent("Battery low") {
+            Text(
+              peripheral?.batteryLow == nil
+                ? "N/A" : peripheral?.batteryLow == true ? "yes" : "no")
+          }
         }
         Section("Advanced") {
           LabeledContent("Device name") {
