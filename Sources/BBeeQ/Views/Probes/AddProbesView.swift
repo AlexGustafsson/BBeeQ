@@ -80,11 +80,11 @@ struct AddProbesView: View {
                 peripheral.identifier.uuidString == probe.id
               })
             }
-          List(
-            newProbes, id: \.identifier,
-            selection: $selection
-          ) { peripheral in
-            Text(peripheral.identifier.uuidString)
+          Select(data: newProbes, id: \.identifier, selection: $selection) { peripheral, selected in
+            HStack {
+              Image(systemName: selected ? "checkmark.circle.fill" : "circle").foregroundStyle(.blue)
+              Text(peripheral.identifier.uuidString)
+            }
           }
         } header: {
           HStack {
@@ -96,9 +96,6 @@ struct AddProbesView: View {
       .formStyle(.grouped)
       #if os(macOS)
         .padding(5)
-      #endif
-      #if (os(iOS))
-        .safeAreaPadding()
       #endif
 
       // Footer
