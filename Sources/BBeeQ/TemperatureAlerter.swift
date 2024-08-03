@@ -72,13 +72,15 @@ actor TemperatureAlerter {
 
     // Make sure we keep track of all thermometers
     for probePeripheral in self.probePeripheralManager.connections.values {
-      self.thermometers.insert(Thermometer(
+      self.thermometers.insert(
+        Thermometer(
           id: UUID(fromHash: "\(probePeripheral.id.uuidString) - probe"),
           probeId: probePeripheral.id,
           label: "probe", currentKey: \.probeTemperature,
           targetKey: \.temperatureTarget, alertState: .idle)
       )
-      self.thermometers.insert(Thermometer(
+      self.thermometers.insert(
+        Thermometer(
           id: UUID(fromHash: "\(probePeripheral.id.uuidString) - grill"),
           probeId: probePeripheral.id,
           label: "grill", currentKey: \.grillTemperature,
@@ -122,7 +124,10 @@ actor TemperatureAlerter {
               probeName: probe.name)
           }
         }
-      } else if case AlertState.triggered(let triggeredTemperature, let triggeredTargetTemperature) = thermometer.alertState {
+      } else if case AlertState.triggered(
+        let triggeredTemperature, let triggeredTargetTemperature) = thermometer
+        .alertState
+      {
         let targetUpdated = targetTemperature != triggeredTargetTemperature
         let temperatureDrop = abs(triggeredTemperature - temperature) > 2
         if targetUpdated || temperatureDrop {

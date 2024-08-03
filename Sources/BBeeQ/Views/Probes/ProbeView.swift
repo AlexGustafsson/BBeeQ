@@ -18,58 +18,64 @@ struct ProbeView: View {
   }
 
   var body: some View {
-    HStack {
-      VStack {
-        HStack {
-          Text(probe.name)
-          Spacer()
-          if peripheral?.state != .connected {
-            Image(systemName: "wifi.slash").foregroundStyle(.orange)
-          }
-          if peripheral?.batteryLow == true {
-            // TODO: Blink
-            Image(systemName: "battery.25percent").foregroundStyle(.orange)
-              .blinking()
-          }
-          Label {
-            Text(
-              "\(Int(peripheral?.probeTemperature?.rounded() ?? 0))°C/\(Int(probe.temperatureTarget.rounded()))°C"
-            )
-          } icon: {
-            Image(systemName: "thermometer.medium").foregroundStyle(.red)
-          }
-          Label {
-            Text(
-              "\(Int(peripheral?.grillTemperature?.rounded() ?? 0))°C/\(Int(probe.grillTemperatureTarget.rounded()))°C"
-            )
-          } icon: {
-            Image(systemName: "flame").foregroundStyle(.red)
-          }
+    VStack(alignment: .leading) {
+      // Status bar
+      HStack(alignment: .center) {
+        Text(probe.name)
+        if peripheral?.state != .connected {
+          Image(systemName: "wifi.slash").foregroundStyle(.orange).blinking()
         }
-        HStack {
+        if peripheral?.batteryLow == true {
+          // TODO: Blink
+          Image(systemName: "battery.25percent").foregroundStyle(.orange)
+            .blinking()
+        }
+        Spacer()
+        // Details
+        Button {
+          presentSheet.toggle()
+        } label: {
+          Image(systemName: "info.circle").resizable()
+            .foregroundStyle(.secondary)
+            .frame(width: 16, height: 16)
+        }
+        .buttonStyle(PlainButtonStyle())
+        .sheet(isPresented: $presentSheet) {
+          // Do nothing
+        } content: {
+          ProbeSettingsView(probe: probe, peripheral: peripheral)
+        }
+      }
+      Spacer(minLength: 12)
+
+      // Probe
+      VStack(alignment: .center) {
+        Label {
+          Text(
+            "\(Int(peripheral?.probeTemperature?.rounded() ?? 0))°C/\(Int(probe.temperatureTarget.rounded()))°C"
+          )
+        } icon: {
           Image(systemName: "thermometer.medium").foregroundStyle(.red)
-          ThermometerSlider(
-            current: peripheral?.probeTemperature ?? 0,
-            target: $probe.temperatureTarget, minValue: 0, maxValue: 100)
         }
-        HStack {
+        ThermometerSlider(
+          current: peripheral?.probeTemperature ?? 0,
+          target: $probe.temperatureTarget, minValue: 0, maxValue: 100)
+      }
+
+      Divider()
+
+      // Grill
+      VStack(alignment: .center) {
+        ThermometerSlider(
+          current: peripheral?.grillTemperature ?? 0,
+          target: $probe.grillTemperatureTarget, minValue: 0, maxValue: 300)
+        Label {
+          Text(
+            "\(Int(peripheral?.grillTemperature?.rounded() ?? 0))°C/\(Int(probe.grillTemperatureTarget.rounded()))°C"
+          )
+        } icon: {
           Image(systemName: "flame").foregroundStyle(.red)
-          ThermometerSlider(
-            current: peripheral?.grillTemperature ?? 0,
-            target: $probe.grillTemperatureTarget, minValue: 0, maxValue: 300)
         }
-      }
-      Button {
-        presentSheet.toggle()
-      } label: {
-        Image(systemName: "info.circle").resizable().foregroundStyle(.secondary)
-          .frame(width: 16, height: 16)
-      }
-      .buttonStyle(PlainButtonStyle())
-      .sheet(isPresented: $presentSheet) {
-        // Do nothing
-      } content: {
-        ProbeSettingsView(probe: probe, peripheral: peripheral)
       }
     }
     .padding()

@@ -20,6 +20,7 @@ struct ProbesView: View {
           ProbeView(
             probe: probe
           )
+          .padding()
         }
 
         if probes.count == 0 {
@@ -38,7 +39,7 @@ struct ProbesView: View {
         .background(Color(UIColor.systemGroupedBackground))
       #endif
 
-      // FAB to add
+      // FAB to add probes
       Button {
         presentAddProbeSheet = true
       } label: {

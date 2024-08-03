@@ -138,7 +138,6 @@ struct ExampleChart: View {
 }
 
 struct ChartCard: View {
-
   var message1: AttributedString {
     var result = AttributedString("23°C")
     result.font = .title
