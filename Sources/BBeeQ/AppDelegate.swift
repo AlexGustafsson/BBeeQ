@@ -123,7 +123,9 @@ private let logger = Logger(
     }
   }
 
-  class AppDelegate: NSObject, UIApplicationDelegate, ProbePeripheralDelegate {
+  class AppDelegate: NSObject, UIApplicationDelegate, ProbePeripheralDelegate,
+    UNUserNotificationCenterDelegate
+  {
     public let modelContainer: ModelContainer
     public var probePeripheralManager: ProbePeripheralManager!
     private var timer: Timer!
@@ -135,6 +137,9 @@ private let logger = Logger(
       super.init()
       self.probePeripheralManager = ProbePeripheralManager(
         delegate: self, queue: DispatchQueue.main)
+      self.timer = Timer.scheduledTimer(
+        timeInterval: 1.0, target: self, selector: #selector(timerAction),
+        userInfo: nil, repeats: true)
     }
 
     func application(
@@ -163,11 +168,26 @@ private let logger = Logger(
         print("Failed")
       }
 
+      UNUserNotificationCenter.current().delegate = self
       Task {
         await Notifications.shared.requestAccess()
       }
 
       return true
+    }
+
+    func userNotificationCenter(
+      _ center: UNUserNotificationCenter,
+      willPresent notification: UNNotification,
+      withCompletionHandler completionHandler: @escaping (
+        UNNotificationPresentationOptions
+      ) -> Void
+    ) {
+      // Update the app interface directly.
+
+      // Show a banner
+      completionHandler(.banner)
+
     }
 
     @objc func timerAction() {
@@ -190,7 +210,7 @@ private let logger = Logger(
               content.body = "\(probe.name) is at (\(probeTemperature)°C)"
               Task {
                 await Notifications.shared.addImmediate(
-                  identifier: UUID().uuidString, content: content)
+                  identifier: "\(probe.id)probetarget", content: content)
               }
             }
           }
@@ -202,7 +222,7 @@ private let logger = Logger(
               content.body = "\(probe.name) is at (\(grillTemperature)°C)"
               Task {
                 await Notifications.shared.addImmediate(
-                  identifier: UUID().uuidString, content: content)
+                  identifier: "\(probe.id)grilltarget", content: content)
               }
             }
           }

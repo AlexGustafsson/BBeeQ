@@ -80,9 +80,11 @@ struct AddProbesView: View {
                 peripheral.identifier.uuidString == probe.id
               })
             }
-          Select(data: newProbes, id: \.identifier, selection: $selection) { peripheral, selected in
+          Select(data: newProbes, id: \.identifier, selection: $selection) {
+            peripheral, selected in
             HStack {
-              Image(systemName: selected ? "checkmark.circle.fill" : "circle").foregroundStyle(.blue)
+              Image(systemName: selected ? "checkmark.circle.fill" : "circle")
+                .foregroundStyle(.blue)
               Text(peripheral.identifier.uuidString)
             }
           }
