@@ -1,3 +1,4 @@
+import CoreHaptics
 import SwiftUI
 
 struct ThermometerSlider: View {
@@ -61,13 +62,14 @@ struct ThermometerSlider: View {
             DragGesture(minimumDistance: 0)
               .onChanged { gesture in
                 held = true
+                // TODO: Min/max
+                // TODO: in iOS 26 beta: let _ = SensoryFeedback.selection()
                 updateValue(with: gesture, in: geometry)
               }
               .onEnded { _ in
                 held = false
               }
           )
-
       }
 
     }
