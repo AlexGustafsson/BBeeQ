@@ -14,6 +14,21 @@ private let logger = Logger(
   class AppDelegate: NSObject, NSApplicationDelegate, ProbePeripheralDelegate {
     public var probePeripheralManager: ProbePeripheralManager!
 
+    var sharedModelContainer: ModelContainer = {
+      let schema = Schema([
+        Probe.self
+      ])
+      let modelConfiguration = ModelConfiguration(
+        schema: schema, isStoredInMemoryOnly: false)
+
+      do {
+        return try ModelContainer(
+          for: schema, configurations: [modelConfiguration])
+      } catch {
+        fatalError("Could not create ModelContainer: \(error)")
+      }
+    }()
+
     override init() {
       super.init()
       self.probePeripheralManager = ProbePeripheralManager(
@@ -28,7 +43,28 @@ private let logger = Logger(
     }
 
     func probePeripheralManager(didDiscover peripheral: CBPeripheral) {
-      // TODO: Auto connect (like was done before)
+      let peripheralId = peripheral.identifier.uuidString
+      // Automatically connect to known probes
+      if peripheral.state == .disconnected {
+        // TODO: Concurrency
+        Task {
+          let modelContext = ModelContext(self.sharedModelContainer)
+
+          let descriptor = FetchDescriptor<Probe>(
+            predicate: #Predicate { $0.id == peripheralId })
+          let count = try modelContext.fetchCount(descriptor)
+
+          if count > 0 {
+            logger.debug(
+              "Auto connecting to peripheral: \(peripheralId, privacy: .public)"
+            )
+            try await self.probePeripheralManager.connect(
+              peripheral: peripheral)
+            logger.debug(
+              "Auto connected to peripheral: \(peripheralId, privacy: .public)")
+          }
+        }
+      }
     }
   }
 #endif
@@ -37,6 +73,21 @@ private let logger = Logger(
 #if os(iOS)
   class AppDelegate: NSObject, UIApplicationDelegate, ProbePeripheralDelegate {
     public var probePeripheralManager: ProbePeripheralManager!
+
+    var sharedModelContainer: ModelContainer = {
+      let schema = Schema([
+        Probe.self
+      ])
+      let modelConfiguration = ModelConfiguration(
+        schema: schema, isStoredInMemoryOnly: false)
+
+      do {
+        return try ModelContainer(
+          for: schema, configurations: [modelConfiguration])
+      } catch {
+        fatalError("Could not create ModelContainer: \(error)")
+      }
+    }()
 
     override init() {
       super.init()
@@ -55,7 +106,28 @@ private let logger = Logger(
     }
 
     func probePeripheralManager(didDiscover peripheral: CBPeripheral) {
-      // TODO: Auto connect (like was done before)
+      let peripheralId = peripheral.identifier.uuidString
+      // Automatically connect to known probes
+      if peripheral.state == .disconnected {
+        // TODO: Concurrency
+        Task {
+          let modelContext = ModelContext(self.sharedModelContainer)
+
+          let descriptor = FetchDescriptor<Probe>(
+            predicate: #Predicate { $0.id == peripheralId })
+          let count = try modelContext.fetchCount(descriptor)
+
+          if count > 0 {
+            logger.debug(
+              "Auto connecting to peripheral: \(peripheralId, privacy: .public)"
+            )
+            try await self.probePeripheralManager.connect(
+              peripheral: peripheral)
+            logger.debug(
+              "Auto connected to peripheral: \(peripheralId, privacy: .public)")
+          }
+        }
+      }
     }
   }
 #endif
