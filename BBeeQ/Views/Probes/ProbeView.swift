@@ -92,6 +92,8 @@ struct ProbeView: View {
   )
   container.mainContext.insert(probe)
 
-  return ProbeView(probe: probe)
-    .modelContainer(container)
+  return ScrollView {
+    ProbeView(probe: probe)
+      .modelContainer(container)
+  }
 }
