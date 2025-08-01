@@ -149,13 +149,9 @@ public class ProbePeripheralManager: NSObject, CBCentralManagerDelegate,
         "Disconnected from peripheral: \(peripheral.identifier, privacy: .public) due to \(error, privacy: .public)"
       )
     }
-    // Received when docking:
-    // disconnected Optional(Error Domain=CBErrorDomain Code=6 "The connection has timed out unexpectedly." UserInfo={NSLocalizedDescription=The connection has timed out unexpectedly.})
-    // TODO - use and figure out if we need this and the one below, or just one
-    // of them
-    if let connection = self.connections.removeValue(
-      forKey: peripheral.identifier)
-    {
+
+    // Keep past connections, but update their state
+    if let connection = self.connections[peripheral.identifier] {
       connection.peripheral(didDisconnect: peripheral, error: error)
     }
   }
