@@ -96,7 +96,7 @@ struct AddProbesView: View {
         } header: {
           HStack {
             Text(adding ? "Connecting probes" : "Discovering probes")
-            ProgressView().scaleEffect(0.5)
+            ProgressView().controlSize(.small)
           }
         }
       }
