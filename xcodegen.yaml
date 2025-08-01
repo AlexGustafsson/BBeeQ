@@ -5,7 +5,7 @@ targets:
   BBeeQ:
     type: application
     platform: iOS
-    deploymentTarget: "17.5"
+    deploymentTarget: "18.3"
     sources: [Sources/BBeeQ]
     settings:
       INFOPLIST_FILE: Sources/BBeeQ/Resources/Info.plist
