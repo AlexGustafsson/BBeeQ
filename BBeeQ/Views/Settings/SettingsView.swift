@@ -41,7 +41,7 @@ struct SettingsView: View {
           }
         }
         Section("Advanced") {
-          Button("Forget all probes") {
+          Button("Forget all probes", role: .destructive) {
             logger.debug("Forgetting all probes")
             if let probePeripheralManager = probePeripheralManager {
               for connection in probePeripheralManager.connections.values {
