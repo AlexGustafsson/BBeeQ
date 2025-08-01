@@ -116,7 +116,7 @@ struct ProbeSettingsView: View {
         }
         .keyboardShortcut(.defaultAction)
       }
-      .padding(20)
+      .safeAreaPadding()
     }
   }
 }
