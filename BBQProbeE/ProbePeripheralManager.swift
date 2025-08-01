@@ -75,6 +75,7 @@ public class ProbePeripheralManager: NSObject, CBCentralManagerDelegate,
 
     let p = ProbePeripheral(peripheral: peripheral)
     self.connections[peripheral.identifier] = p
+    self.connectionAttempts[peripheral.identifier] = nil
     return p
   }
 
