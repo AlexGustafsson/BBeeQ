@@ -8,6 +8,8 @@ private let logger = Logger(
 struct SettingsView: View {
   @State private var autoConnect = true
 
+  @State private var presentSheet = false
+
   @Environment(\.modelContext) var modelContext
   @Environment(\.probePeripheralManager) var probePeripheralManager
 
@@ -26,7 +28,20 @@ struct SettingsView: View {
               Text(
                 probe.name
               )
-              // TODO: Button to probe settings view
+              Spacer()
+              Button {
+                presentSheet.toggle()
+              } label: {
+                Image(systemName: "info.circle").resizable()
+                  .foregroundStyle(.secondary)
+                  .frame(width: 16, height: 16)
+              }
+              .buttonStyle(PlainButtonStyle())
+              .sheet(isPresented: $presentSheet) {
+                // Do nothing
+              } content: {
+                ProbeSettingsView(probe: probe, peripheral: nil)
+              }
             }
           }
 
