@@ -30,6 +30,10 @@ public class ProbePeripheral: NSObject, Identifiable, CBPeripheralDelegate {
     // relay all calls
     // peripheral.delegate = self
 
+    self.refresh()
+  }
+
+  internal func refresh() {
     logger.info("Subscribing to bluetooth updates from peripheral")
     guard
       let probeService = peripheral.services?
@@ -141,6 +145,10 @@ public class ProbePeripheral: NSObject, Identifiable, CBPeripheralDelegate {
       // Do nothing
       break
     }
+  }
+
+  public func peripheral(didConnect peripheral: CBPeripheral) {
+    self.state = peripheral.state
   }
 
   public func peripheral(

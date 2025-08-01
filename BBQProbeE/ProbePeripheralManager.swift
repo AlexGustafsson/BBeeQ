@@ -115,7 +115,12 @@ public class ProbePeripheralManager: NSObject, CBCentralManagerDelegate,
   ) {
     // Discover services for the peripheral, kick starting the connection
     // validation flow
-    logger.info("Connected to peripheral, discovering services")
+    if let connection = self.connections[peripheral.identifier] {
+      logger.info("Reconnected to peripheral, discovering services")
+      connection.peripheral(didConnect: peripheral)
+    } else {
+      logger.info("Connected to peripheral, discovering services")
+    }
     peripheral.discoverServices([
       CBUUID(string: BBQProbeEServiceUUID),
       CBUUID(string: DeviceInformationServiceUUID),
@@ -184,14 +189,11 @@ public class ProbePeripheralManager: NSObject, CBCentralManagerDelegate,
     _ peripheral: CBPeripheral, didDiscoverServices error: (any Error)?
   ) {
     logger.info("Discovered services")
-    guard let connectionAttempt = self.connectionAttempts[peripheral.identifier]
-    else {
-      return
-    }
+    let connectionAttempt = self.connectionAttempts[peripheral.identifier]
 
     // Failed to connect
     if let error = error {
-      connectionAttempt.resume(throwing: error)
+      connectionAttempt?.resume(throwing: error)
       self.connectionAttempts[peripheral.identifier] = nil
       return
     }
@@ -201,8 +203,9 @@ public class ProbePeripheralManager: NSObject, CBCentralManagerDelegate,
       let probeService = peripheral.services?
         .first(where: { $0.uuid.uuidString == BBQProbeEServiceUUID })
     else {
-      connectionAttempt.resume(
-        throwing: ConnectionError.missingRequiredServices)
+      connectionAttempt?
+        .resume(
+          throwing: ConnectionError.missingRequiredServices)
       self.connectionAttempts[peripheral.identifier] = nil
       return
     }
@@ -211,8 +214,9 @@ public class ProbePeripheralManager: NSObject, CBCentralManagerDelegate,
       let deviceInformationService = peripheral.services?
         .first(where: { $0.uuid.uuidString == DeviceInformationServiceUUID })
     else {
-      connectionAttempt.resume(
-        throwing: ConnectionError.missingRequiredServices)
+      connectionAttempt?
+        .resume(
+          throwing: ConnectionError.missingRequiredServices)
       self.connectionAttempts[peripheral.identifier] = nil
       return
     }
@@ -240,10 +244,7 @@ public class ProbePeripheralManager: NSObject, CBCentralManagerDelegate,
     didDiscoverCharacteristicsFor service: CBService, error: (any Error)?
   ) {
     logger.info("Discovered characteristics")
-    guard let connectionAttempt = self.connectionAttempts[peripheral.identifier]
-    else {
-      return
-    }
+    let connectionAttempt = self.connectionAttempts[peripheral.identifier]
 
     // Assume we discovered once all services have at least one characteristic
     if let services = peripheral.services {
@@ -257,7 +258,12 @@ public class ProbePeripheralManager: NSObject, CBCentralManagerDelegate,
         }
       }
     }
-    connectionAttempt.resume()
+
+    if let connection = self.connections[peripheral.identifier] {
+      connection.refresh()
+    }
+
+    connectionAttempt?.resume()
     self.connectionAttempts[peripheral.identifier] = nil
   }
 
