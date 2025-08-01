@@ -93,7 +93,16 @@ public class ProbePeripheral: NSObject, Identifiable, CBPeripheralDelegate {
     error: (any Error)?
   ) {
     // TODO: Error handling. For now, let's assume subscriptions work
-    print("notify \(characteristic.uuid) - \(error)")
+    if error == nil {
+      logger.error(
+        "Subscribed to characteristic: \(self.peripheral.identifier, privacy: .public)"
+      )
+
+    } else {
+      logger.info(
+        "Failed to subscribe to characteristic: \(self.peripheral.identifier, privacy: .public) due to \(error, privacy: .public)"
+      )
+    }
   }
 
   public func peripheral(
