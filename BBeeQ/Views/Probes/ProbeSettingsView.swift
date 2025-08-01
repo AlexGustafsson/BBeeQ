@@ -71,7 +71,7 @@ struct ProbeSettingsView: View {
           LabeledContent("Battery low") {
             Text(
               peripheral?.batteryLow == nil
-                ? "N/A" : peripheral?.batteryLow == true ? "yes" : "no")
+                ? "" : peripheral?.batteryLow == true ? "yes" : "no")
           }
         }
         Section("Advanced") {
