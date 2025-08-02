@@ -1,3 +1,4 @@
+import BBQProbeE
 import Charts
 import SwiftData
 import SwiftUI
@@ -16,7 +17,9 @@ struct ChartsView: View {
     ZStack {
       ScrollView {
         ForEach(probes) { probe in
-          ProbeChartView(probe: probe).padding()
+          ProbeChartView(
+            probe: probe
+          )
         }
 
         // TODO: A single grill card with average and min max area

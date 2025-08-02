@@ -98,7 +98,7 @@ struct ProbesView: View {
   let probe = Probe(
     id: "1", name: "Probe 1", temperatureTarget: 70, grillTemperatureTarget: 300
   )
-  //container.mainContext.insert(probe)
+  container.mainContext.insert(probe)
 
   return ProbesView()
     .modelContainer(container)

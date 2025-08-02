@@ -23,6 +23,8 @@ import SwiftUI
     }
     .modelContainer(appDelegate.sharedModelContainer)
     .environment(
-      \.probePeripheralManager, appDelegate.probePeripheralManager)
+      \.probePeripheralManager, appDelegate.probePeripheralManager
+    )
+    .environment(\.historyManager, appDelegate.historyManager)
   }
 }

@@ -19,6 +19,7 @@ class AppDelegate: NSObject, MultiplatformApplicationDelegate,
   ProbePeripheralDelegate
 {
   public var probePeripheralManager: ProbePeripheralManager!
+  public var historyManager: HistoryManager!
 
   var sharedModelContainer: ModelContainer = {
     let schema = Schema([
@@ -39,6 +40,9 @@ class AppDelegate: NSObject, MultiplatformApplicationDelegate,
     super.init()
     self.probePeripheralManager = ProbePeripheralManager(
       delegate: self, queue: DispatchQueue.main)
+    self.historyManager = HistoryManager(
+      probeManager: self.probePeripheralManager)
+    self.historyManager.start()
   }
 
   #if os(macOS)

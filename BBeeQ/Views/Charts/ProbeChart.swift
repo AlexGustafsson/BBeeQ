@@ -1,16 +1,12 @@
+import BBQProbeE
 import Charts
 import SwiftUI
 
 struct ProbeChart: View {
   @State var connected = false
+  @State var data: [TemperatureOverTime]?
 
   // TODO: auto compaction - second to minute resolution - use average for readings
-  let data: [TemperatureOverTime] = [Int](0...20)
-    .map {
-      TemperatureOverTime(
-        date: Date.now.advanced(by: -TimeInterval($0 * 60)),
-        temperature: Float.random(in: 20...26))
-    }
   let prediction: [TemperatureOverTime] = [Int](0...20)
     .map {
       TemperatureOverTime(
@@ -25,28 +21,30 @@ struct ProbeChart: View {
         .lineStyle(StrokeStyle(lineWidth: 1, dash: [3])).foregroundStyle(.red)
 
       // Data
-      ForEach(data, id: \.date) { item in
-        LineMark(
-          x: .value("Date", item.date),
-          y: .value("Temperature", item.temperature),
-          series: .value("Probe", "1")
-        )
-        .foregroundStyle(.red)
+      if data != nil {
+        ForEach(data!, id: \.date) { item in
+          LineMark(
+            x: .value("Date", item.date),
+            y: .value("Temperature", item.temperature),
+            series: .value("Probe", "1")
+          )
+          .foregroundStyle(.red)
+        }
       }
 
       // Prediction
-      ForEach(prediction, id: \.date) { item in
-        LineMark(
-          x: .value("Date", item.date),
-          y: .value("Temperature", item.temperature)
-        )
-        .foregroundStyle(.gray.opacity(0.5))
-      }
+      //ForEach(prediction, id: \.date) { item in
+      //  LineMark(
+      //    x: .value("Date", item.date),
+      //    y: .value("Temperature", item.temperature)
+      //  )
+      //  .foregroundStyle(.gray.opacity(0.5))
+      //}
 
       // Now point
       PointMark(
         x: .value("Date", Date.now),
-        y: .value("Temperature", data.last!.temperature)
+        y: .value("Temperature", data?.last?.temperature ?? 0)
       )
       .symbol {
         PulsatingCircle(animate: connected)
@@ -113,7 +111,14 @@ struct ProbeChart: View {
 }
 
 #Preview {
+  let data: [TemperatureOverTime] = [Int](0...20)
+    .map {
+      TemperatureOverTime(
+        date: Date.now.advanced(by: -TimeInterval($0 * 60)),
+        temperature: Float.random(in: 20...26))
+    }
+
   ScrollView {
-    ProbeChart().padding()
+    ProbeChart(data: data).padding()
   }
 }

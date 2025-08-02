@@ -10,7 +10,20 @@ import SwiftUI
 
 struct ProbeChartView: View {
   @State var probe: Probe
-  @State var peripheral: ProbePeripheral?
+
+  @Environment(\.probePeripheralManager) var probePeripheralManager:
+    ProbePeripheralManager?
+  @Environment(\.historyManager) var historyManager: HistoryManager?
+
+  private var peripheral: ProbePeripheral? {
+    return probePeripheralManager?
+      .connections[UUID(uuidString: probe.id)!]
+  }
+
+  private var data: [TemperatureOverTime]? {
+    return historyManager?
+      .probeTemperature[UUID(uuidString: probe.id)!]
+  }
 
   var message1: AttributedString {
     var result = AttributedString("\(peripheral?.probeTemperature ?? 0)°C")
@@ -55,7 +68,7 @@ struct ProbeChartView: View {
         }
         .padding()
       }
-      ProbeChart(connected: peripheral != nil)
+      ProbeChart(connected: peripheral != nil, data: data)
     }
     .padding()
     .background(.white)
