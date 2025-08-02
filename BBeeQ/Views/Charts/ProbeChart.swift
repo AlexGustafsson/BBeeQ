@@ -1,34 +1,7 @@
 import Charts
 import SwiftUI
 
-struct TemperatureOverTime {
-  var date: Date
-  var temperature: Float
-}
-
-struct PulsatingCircle: View {
-  @State var animate = false
-  var body: some View {
-    VStack {
-      ZStack {
-        Circle().fill(.red).strokeBorder(.white, lineWidth: 2)
-          .frame(width: 12, height: 12)
-        Circle().fill(.red.opacity(0.25)).frame(width: 40, height: 40)
-          .scaleEffect(self.animate ? 1 : 0)
-        Circle().fill(.red.opacity(0.35)).frame(width: 30, height: 30)
-          .scaleEffect(self.animate ? 1 : 0)
-        Circle().fill(.red.opacity(0.45)).frame(width: 15, height: 15)
-          .scaleEffect(self.animate ? 1 : 0)
-      }
-      .onAppear { self.animate.toggle() }
-      .animation(
-        .easeInOut(duration: 1).repeatForever(autoreverses: true),
-        value: animate)
-    }
-  }
-}
-
-struct ExampleChart: View {
+struct ProbeChart: View {
   // TODO: auto compaction - second to minute resolution - use average for readings
   let data: [TemperatureOverTime] = [Int](0...20)
     .map {
@@ -137,76 +110,8 @@ struct ExampleChart: View {
   }
 }
 
-struct ChartCard: View {
-  var message1: AttributedString {
-    var result = AttributedString("23°C")
-    result.font = .title
-    result.foregroundColor = .red
-    return result
-  }
-
-  var message3: AttributedString {
-    var result = AttributedString("70°C")
-    result.font = .title
-    result.foregroundColor = .gray
-    return result
-  }
-
-  var message4: AttributedString {
-    var result = AttributedString(" in 25m")
-    result.foregroundColor = .gray
-    return result
-  }
-
-  var body: some View {
-    VStack(alignment: .leading) {
-      Label("Probe temperature", systemImage: "flame.fill")
-        .foregroundStyle(.red)
-      Divider()
-      HStack {
-        VStack(alignment: .leading) {
-          HStack(alignment: .center) {
-            Circle().fill(.red).frame(width: 8, height: 8)
-            Text("Current").foregroundStyle(.red)
-          }
-          Text(message1)
-        }
-        .padding()
-        VStack(alignment: .leading) {
-          HStack(alignment: .center) {
-            Circle().fill(.gray).frame(width: 8, height: 8)
-            Text("Target").foregroundStyle(.gray)
-          }
-          Text(message3 + message4)
-        }
-        .padding()
-      }
-      ExampleChart()
-    }
-    .padding()
-    .background(.white)
-    .cornerRadius(15)
-  }
-}
-
-struct ChartsView: View {
-  var body: some View {
-    ScrollView {
-      ChartCard().padding()
-      ChartCard().padding()
-      ChartCard().padding()
-
-      // TODO: Probe cards and a single grill card with average and min max area
-      // ruler
-    }
-    .scrollContentBackground(.hidden)
-    .background(.clear)
-    #if os(iOS)
-      .background(Color(UIColor.systemGroupedBackground))
-    #endif
-  }
-}
-
 #Preview {
-  ChartsView()
+  ScrollView {
+    ProbeChart().padding()
+  }
 }

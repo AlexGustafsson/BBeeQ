@@ -1,0 +1,72 @@
+//
+//  GraphView.swift
+//  BBeeQ
+//
+//  Created by Alex Gustafsson on 2025-08-02.
+//
+
+import SwiftUI
+
+struct ProbeChartView: View {
+  @State var probe: Probe
+
+  var message1: AttributedString {
+    var result = AttributedString("23°C")
+    result.font = .title
+    result.foregroundColor = .red
+    return result
+  }
+
+  var message3: AttributedString {
+      var result = AttributedString("\(probe.temperatureTarget)°C")
+    result.font = .title
+    result.foregroundColor = .gray
+    return result
+  }
+
+  var message4: AttributedString {
+    var result = AttributedString(" in 25m")
+    result.foregroundColor = .gray
+    return result
+  }
+
+  var body: some View {
+    VStack(alignment: .leading) {
+        Label("\(probe.name) temperature", systemImage: "thermometer.variable")
+        .foregroundStyle(.red)
+      Divider()
+      HStack {
+        VStack(alignment: .leading) {
+          HStack(alignment: .center) {
+            Circle().fill(.red).frame(width: 8, height: 8)
+            Text("Current").foregroundStyle(.red)
+          }
+          Text(message1)
+        }
+        .padding()
+        VStack(alignment: .leading) {
+          HStack(alignment: .center) {
+            Circle().fill(.gray).frame(width: 8, height: 8)
+            Text("Target").foregroundStyle(.gray)
+          }
+          Text(message3 + message4)
+        }
+        .padding()
+      }
+      ProbeChart()
+    }
+    .padding()
+    .background(.white)
+    .cornerRadius(15)
+  }
+}
+
+#Preview {
+  let probe = Probe(
+    id: "1", name: "Probe 1", temperatureTarget: 70, grillTemperatureTarget: 300
+  )
+
+  ScrollView {
+    ProbeChartView(probe: probe)
+  }
+}
