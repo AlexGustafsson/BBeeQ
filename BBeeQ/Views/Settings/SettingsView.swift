@@ -6,8 +6,6 @@ private let logger = Logger(
   subsystem: Bundle.main.bundleIdentifier!, category: "Data")
 
 struct SettingsView: View {
-  @State private var autoConnect = true
-
   @State private var presentSheet = false
 
   @Environment(\.modelContext) var modelContext
@@ -18,10 +16,6 @@ struct SettingsView: View {
   var body: some View {
     VStack {
       Form {
-        Section("General") {
-          // TODO: Persist
-          Toggle("Auto connect", isOn: $autoConnect)
-        }
         Section("Probes") {
           ForEach(probes) { probe in
             HStack {
@@ -55,23 +49,22 @@ struct SettingsView: View {
             .padding(10).font(.callout).foregroundStyle(.secondary)
           }
         }
-        Section("Advanced") {
-          Button("Forget all probes", role: .destructive) {
-            logger.debug("Forgetting all probes")
-            if let probePeripheralManager = probePeripheralManager {
-              for connection in probePeripheralManager.connections.values {
-                logger.debug("Disconnecting \(connection.id)")
-                probePeripheralManager.disconnect(peripheral: connection)
-              }
-            }
 
-            do {
-              try modelContext.delete(model: Probe.self)
-              try modelContext.save()
-            } catch {
-              logger.error(
-                "Failed to delete probes: \(error, privacy: .public)")
+        Button("Forget all probes", role: .destructive) {
+          logger.debug("Forgetting all probes")
+          if let probePeripheralManager = probePeripheralManager {
+            for connection in probePeripheralManager.connections.values {
+              logger.debug("Disconnecting \(connection.id)")
+              probePeripheralManager.disconnect(peripheral: connection)
             }
+          }
+
+          do {
+            try modelContext.delete(model: Probe.self)
+            try modelContext.save()
+          } catch {
+            logger.error(
+              "Failed to delete probes: \(error, privacy: .public)")
           }
         }
       }
