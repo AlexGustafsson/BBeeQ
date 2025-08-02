@@ -6,7 +6,8 @@ private let logger = Logger(
   subsystem: Bundle.main.bundleIdentifier!, category: "Data")
 
 struct SettingsView: View {
-  @State private var presentSheet = false
+  @State private var presentProbeSheet = false
+  @State var presentAddProbesSheet: Bool = false
 
   @Environment(\.modelContext) var modelContext
   @Environment(\.probePeripheralManager) var probePeripheralManager
@@ -24,14 +25,14 @@ struct SettingsView: View {
               )
               Spacer()
               Button {
-                presentSheet.toggle()
+                presentProbeSheet.toggle()
               } label: {
                 Image(systemName: "info.circle").resizable()
                   .foregroundStyle(.secondary)
                   .frame(width: 16, height: 16)
               }
               .buttonStyle(PlainButtonStyle())
-              .sheet(isPresented: $presentSheet) {
+              .sheet(isPresented: $presentProbeSheet) {
                 // Do nothing
               } content: {
                 ProbeSettingsView(probe: probe, peripheral: nil)
@@ -41,13 +42,25 @@ struct SettingsView: View {
 
           if probes.count == 0 {
             Text(
-              "No probes. Probes are automatically added when they are found."
+              "No probes added yet."
             )
             .frame(
               maxWidth: .infinity, alignment: .center
             )
             .padding(10).font(.callout).foregroundStyle(.secondary)
           }
+        }
+
+        Button("Add probes") {
+          presentAddProbesSheet.toggle()
+        }
+        .sheet(isPresented: $presentAddProbesSheet) {
+          // Do nothing
+        } content: {
+          AddProbesView()
+            #if os(macOS)
+              .frame(width: 520)
+            #endif
         }
 
         Button("Forget all probes", role: .destructive) {
