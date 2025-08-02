@@ -58,7 +58,7 @@ private let logger = Logger(
             logger.debug(
               "Auto connecting to peripheral: \(peripheralId, privacy: .public)"
             )
-            try await self.probePeripheralManager.connect(
+            _ = try await self.probePeripheralManager.connect(
               peripheral: peripheral)
             logger.debug(
               "Auto connected to peripheral: \(peripheralId, privacy: .public)")
@@ -121,7 +121,7 @@ private let logger = Logger(
             logger.debug(
               "Auto connecting to peripheral: \(peripheralId, privacy: .public)"
             )
-            try await self.probePeripheralManager.connect(
+            _ = try await self.probePeripheralManager.connect(
               peripheral: peripheral)
             logger.debug(
               "Auto connected to peripheral: \(peripheralId, privacy: .public)")
