@@ -54,7 +54,7 @@ struct ProbeView: View {
             "\(Int(peripheral?.probeTemperature?.rounded() ?? 0))°C/\(Int(probe.temperatureTarget.rounded()))°C"
           )
         } icon: {
-          Image(systemName: "thermometer.medium").foregroundStyle(.red)
+          Image(systemName: "thermometer.variable").foregroundStyle(.red)
         }
         ThermometerSlider(
           current: peripheral?.probeTemperature ?? 0,

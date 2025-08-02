@@ -13,7 +13,7 @@ struct ContentView: View {
     TabView {
       ProbesView()
         .tabItem {
-          Label("Thermometer", systemImage: "thermometer.medium")
+          Label("Probes", systemImage: "thermometer.variable")
         }
 
       ChartsView()
