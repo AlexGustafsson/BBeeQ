@@ -5,20 +5,22 @@
 //  Created by Alex Gustafsson on 2025-08-02.
 //
 
+import BBQProbeE
 import SwiftUI
 
 struct ProbeChartView: View {
   @State var probe: Probe
+  @State var peripheral: ProbePeripheral?
 
   var message1: AttributedString {
-    var result = AttributedString("23°C")
+    var result = AttributedString("\(peripheral?.probeTemperature ?? 0)°C")
     result.font = .title
     result.foregroundColor = .red
     return result
   }
 
   var message3: AttributedString {
-      var result = AttributedString("\(probe.temperatureTarget)°C")
+    var result = AttributedString("\(probe.temperatureTarget)°C")
     result.font = .title
     result.foregroundColor = .gray
     return result
@@ -32,7 +34,7 @@ struct ProbeChartView: View {
 
   var body: some View {
     VStack(alignment: .leading) {
-        Label("\(probe.name) temperature", systemImage: "thermometer.variable")
+      Label("\(probe.name) temperature", systemImage: "thermometer.variable")
         .foregroundStyle(.red)
       Divider()
       HStack {
@@ -53,7 +55,7 @@ struct ProbeChartView: View {
         }
         .padding()
       }
-      ProbeChart()
+      ProbeChart(connected: peripheral != nil)
     }
     .padding()
     .background(.white)

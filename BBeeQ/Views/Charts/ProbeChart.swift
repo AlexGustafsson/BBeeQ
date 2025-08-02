@@ -2,6 +2,8 @@ import Charts
 import SwiftUI
 
 struct ProbeChart: View {
+  @State var connected = false
+
   // TODO: auto compaction - second to minute resolution - use average for readings
   let data: [TemperatureOverTime] = [Int](0...20)
     .map {
@@ -47,7 +49,7 @@ struct ProbeChart: View {
         y: .value("Temperature", data.last!.temperature)
       )
       .symbol {
-        PulsatingCircle()
+        PulsatingCircle(animate: connected)
           .frame(width: 12)
       }
 
