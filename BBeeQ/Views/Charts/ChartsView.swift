@@ -19,7 +19,8 @@ struct ChartsView: View {
         ForEach(probes) { probe in
           ProbeChartView(
             probe: probe
-          ).padding()
+          )
+          .padding()
         }
 
         // TODO: A single grill card with average and min max area
