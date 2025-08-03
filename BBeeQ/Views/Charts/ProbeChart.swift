@@ -3,6 +3,7 @@ import Charts
 import SwiftUI
 
 struct ProbeChart: View {
+  @State var target: Float?
   @State var connected = false
   @State var data: [TemperatureOverTime]?
 
@@ -17,8 +18,10 @@ struct ProbeChart: View {
   var body: some View {
     Chart {
       // Target horizontal line
-      RuleMark(y: .value("Target", 70))
-        .lineStyle(StrokeStyle(lineWidth: 1, dash: [3])).foregroundStyle(.red)
+      if target != nil {
+        RuleMark(y: .value("Target", target!))
+          .lineStyle(StrokeStyle(lineWidth: 1, dash: [3])).foregroundStyle(.red)
+      }
 
       // Data
       if data != nil {
@@ -28,7 +31,7 @@ struct ProbeChart: View {
             y: .value("Temperature", item.temperature),
             series: .value("Probe", "1")
           )
-          .foregroundStyle(.red)
+          .foregroundStyle(connected ? .red : .gray)
         }
       }
 
@@ -47,7 +50,8 @@ struct ProbeChart: View {
         y: .value("Temperature", data?.last?.temperature ?? 0)
       )
       .symbol {
-        PulsatingCircle(animate: connected)
+        PulsatingCircle().animate(connected)
+          .fill(connected ? .red : .gray)
           .frame(width: 12)
       }
 

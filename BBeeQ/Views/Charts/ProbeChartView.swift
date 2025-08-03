@@ -28,7 +28,7 @@ struct ProbeChartView: View {
   var message1: AttributedString {
     var result = AttributedString("\(peripheral?.probeTemperature ?? 0)°C")
     result.font = .title
-    result.foregroundColor = .red
+    result.foregroundColor = peripheral == nil ? .gray : .red
     return result
   }
 
@@ -48,13 +48,14 @@ struct ProbeChartView: View {
   var body: some View {
     VStack(alignment: .leading) {
       Label("\(probe.name) temperature", systemImage: "thermometer.variable")
-        .foregroundStyle(.red)
+        .foregroundStyle(peripheral == nil ? .gray : .red)
       Divider()
       HStack {
         VStack(alignment: .leading) {
           HStack(alignment: .center) {
-            Circle().fill(.red).frame(width: 8, height: 8)
-            Text("Current").foregroundStyle(.red)
+            Circle().fill(peripheral == nil ? .gray : .red)
+              .frame(width: 8, height: 8)
+            Text("Current").foregroundStyle(peripheral == nil ? .gray : .red)
           }
           Text(message1)
         }
@@ -68,7 +69,10 @@ struct ProbeChartView: View {
         }
         .padding()
       }
-      ProbeChart(connected: peripheral != nil, data: data)
+      ProbeChart(
+        target: Float(probe.temperatureTarget), connected: peripheral != nil,
+        data: data,
+      )
     }
     .padding()
     .background(.white)
